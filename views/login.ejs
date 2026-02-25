@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Iniciar sesión - Perfil Humano Digital</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="page-auth">
+  <div class="auth-layout">
+
+    <!-- Columna izquierda: banner + mensaje -->
+    <section class="auth-visual">
+      <img
+        src="/img/perfil-humano-digital-banner.png"
+        alt="Perfil Humano Digital"
+        class="auth-banner"
+      />
+
+      <div class="auth-visual-text">
+        <h1>Bienvenido(a) al Perfil Humano Digital</h1>
+        <p>
+          Construye tu <strong>perfil humano digital</strong> respondiendo un
+          cuestionario diseñado para capturar tus rasgos, decisiones y estilo
+          personal.
+        </p>
+        <ul>
+          <li>Avance guardado automáticamente en cada pregunta.</li>
+          <li>Puedes cerrar sesión y continuar donde te quedaste.</li>
+          <li>Tu información se maneja con confidencialidad.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Columna derecha: formulario -->
+    <section class="auth-form-card">
+      <header class="auth-form-header">
+        <h2>Inicia sesión</h2>
+        <p>Accede a tu perfil humano digital para continuar el cuestionario.</p>
+      </header>
+
+      <% if (error) { %>
+        <div class="alert"><%= error %></div>
+      <% } %>
+
+      <form method="POST" action="/login" class="form">
+        <label>Correo electrónico
+          <input type="email" name="email" autocomplete="email" required>
+        </label>
+
+        <label>Contraseña
+          <input type="password" name="password" autocomplete="current-password" required>
+        </label>
+
+        <button type="submit" class="primary-button full-width">
+          Entrar
+        </button>
+      </form>
+
+      <p class="auth-footer-text">
+        ¿Aún no tienes cuenta?
+        <a href="/register">Crear cuenta para iniciar tu Perfil Humano Digital</a>
+      </p>
+    </section>
+
+  </div>
+</body>
+</html>

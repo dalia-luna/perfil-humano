@@ -1,0 +1,23 @@
+{
+  "name": "perfil-humano",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",                  
+    "scripts": {
+    "start": "node app.js",         
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "pdfkit": "^0.17.2",
+    "sqlite3": "^5.1.7",
+    "xlsx": "^0.18.5"
+  }
+}

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Indicaciones - Perfil Humano Digital</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="page-main">
+  <div class="main-card">
+    <header class="top-bar">
+      <div class="top-bar-title">
+        Perfil Humano Digital · <span class="pill pill-soft">Cuestionario</span>
+      </div>
+      <nav class="top-bar-actions">
+        <form action="/logout" method="GET" style="display:inline;">
+          <button type="submit" class="link-button">Cerrar sesión</button>
+        </form>
+      </nav>
+    </header>
+
+    <section class="section-header">
+      <h1>Indicaciones generales</h1>
+      <p>
+        Este cuestionario consta de <strong><%= totalQuestions %></strong> preguntas.
+        Tus respuestas nos ayudarán a construir tu <strong>Perfil Humano Digital</strong>.
+      </p>
+    </section>
+
+    <section class="instructions-grid">
+      <div>
+        <h2>¿Cómo funciona?</h2>
+        <ul>
+          <li>Responde cada pregunta de forma honesta y reflexiva.</li>
+          <li>No hay respuestas correctas o incorrectas.</li>
+          <li>Tu progreso se guarda automáticamente en cada pregunta.</li>
+          <li>Si cierras sesión, podrás continuar donde te quedaste.</li>
+        </ul>
+      </div>
+
+      <div class="progress-summary">
+        <h2>Tu progreso</h2>
+        <% 
+          let progressPercent = 0;
+          if (lastQuestion && totalQuestions) {
+            progressPercent = Math.round((lastQuestion / totalQuestions) * 100);
+          }
+        %>
+
+        <p>
+          Preguntas respondidas: 
+          <strong><%= lastQuestion %> / <%= totalQuestions %></strong>
+        </p>
+
+        <div class="progress progress-large">
+          <div class="progress-bar" style="width: <%= progressPercent %>%;"></div>
+        </div>
+        <p class="progress-text">
+          Avance total: <strong><%= progressPercent %>%</strong>
+        </p>
+
+        <% if (lastQuestion === 0) { %>
+          <p>Aún no has comenzado el cuestionario.</p>
+        <% } else if (lastQuestion < totalQuestions) { %>
+          <p>Has avanzado, pero todavía no completas tu perfil.</p>
+        <% } else { %>
+          <p class="done-text">
+            ¡Has respondido todas las preguntas! Puedes revisar y <strong>editar tus respuestas</strong>.
+          </p>
+        <% } %>
+      </div>
+    </section>
+
+    <section class="section-footer">
+      <form method="POST" action="/instructions/start">
+        <button type="submit" class="primary-button">
+          <%= buttonLabel %>
+        </button>
+      </form>
+    </section>
+  </div>
+</body>
+</html>
+

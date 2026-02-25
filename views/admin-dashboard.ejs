@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard Admin - Perfil Humano Digital</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="page-admin">
+  <div class="container">
+    <header class="top-bar">
+      <div><strong>Panel de administración</strong> · Perfil Humano Digital</div>
+      <nav>
+        <a href="/admin/export/excel" class="primary-button" style="margin-right: 8px;">
+          Exportar Excel
+        </a>
+        <a href="/admin/export/pdf" class="primary-button">
+          Exportar PDF
+        </a>
+        <form action="/logout" method="GET" style="display:inline; margin-left: 12px;">
+          <button type="submit" class="link-button">Cerrar sesión</button>
+        </form>
+      </nav>
+    </header>
+
+    <h1>Perfiles respondidos</h1>
+    <p>
+      Total de preguntas por perfil: <strong><%= totalQuestions %></strong>
+    </p>
+
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Correo</th>
+          <th>Rol</th>
+          <th>Preguntas respondidas</th>
+          <th>Avance</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% users.forEach(function(user) { %>
+          <tr>
+            <td><%= user.id %></td>
+            <td><%= user.name %></td>
+            <td><%= user.email %></td>
+            <td><%= user.role %></td>
+            <td><%= user.answered %></td>
+            <td>
+              <%= user.completion %>% 
+              <% if (user.completed) { %>
+                <span class="badge-completed">Completado</span>
+              <% } %>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

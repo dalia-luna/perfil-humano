@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Pregunta <%= number %> - Perfil Humano Digital</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body class="page-main">
+  <div class="main-card">
+    <header class="top-bar">
+      <div class="top-bar-title">
+        Perfil Humano Digital ·
+        <span class="pill">Pregunta <%= number %> / <%= totalQuestions %></span>
+      </div>
+      <nav class="top-bar-actions">
+        <a href="<%= mode === 'edit' ? '/edit-answers' : '/instructions' %>" class="secondary-link">
+          <%= mode==='edit' ? 'Volver a editar respuestas' : 'Volver al resumen' %>
+        </a>
+        <form action="/logout" method="GET" style="display:inline; margin-left: 10px;">
+          <button type="submit" class="link-button">Cerrar sesión</button>
+        </form>
+      </nav>
+    </header>
+
+    <section class="question-header">
+      <div class="question-progress-wrapper">
+        <div class="progress progress-large">
+          <div class="progress-bar" style="width: <%= progressPercent %>%;"></div>
+        </div>
+        <p class="progress-text">
+          Avance: <strong>
+            <%= progressPercent.toFixed(1) %>%
+          </strong>
+        </p>
+      </div>
+
+      <h1>Pregunta <%= number %>
+      </h1>
+      <p class="question-text">
+        <%= question.text %>
+      </p>
+      <% if (question.image) { %>
+        <div class="question-image-wrapper">
+          <img src="<%= question.image %>" alt="Ilustración de la pregunta <%= number %>" class="question-image">
+        </div>
+        <% } %>
+
+    </section>
+
+    <section class="question-body">
+      <form method="POST" action="/question/<%= number %>" class="form">
+        <!-- Indicador de modo (normal vs edición) -->
+        <input type="hidden" name="mode" value="<%= mode %>">
+
+        <% if (question.type==='select' ) { %>
+          <label>Selecciona la opción que mejor te describe:
+            <select name="answer" class="select-control" required>
+              <option value="">Selecciona una opción...</option>
+              <% question.options.forEach(function(opt) { %>
+                <option value="<%= opt %>" <%=existingAnswer===opt ? 'selected' : '' %>><%= opt %>
+                </option>
+                <% }); %>
+            </select>
+          </label>
+          <% } else if (question.type==='radio' ) { %>
+            <fieldset class="option-list">
+              <legend>Selecciona la opción que mejor te describe:</legend>
+              <% question.options.forEach(function(opt) { %>
+                <label class="radio-item">
+                  <input type="radio" name="answer" value="<%= opt %>" <%=existingAnswer===opt ? 'checked' : '' %>
+                  required
+                  >
+                  <span>
+                    <%= opt %>
+                  </span>
+                </label>
+                <% }); %>
+            </fieldset>
+            <% } else { %>
+              <!-- Fallback por si en el futuro agregas otro tipo -->
+              <label>Tu respuesta:
+                <textarea name="answer" rows="6" required><%= existingAnswer %></textarea>
+              </label>
+              <% } %>
+
+                <div class="question-actions">
+                  <button type="submit" class="primary-button">
+                    <%= number===totalQuestions && mode==='normal' ? 'Guardar y finalizar' : 'Guardar' %>
+                  </button>
+                  <% if (mode==='normal' && number < totalQuestions) { %>
+                    <span class="hint-text">
+                      Se guardará tu respuesta y continuarás con la siguiente pregunta.
+                    </span>
+                    <% } else if (mode==='edit' ) { %>
+                      <span class="hint-text">
+                        Se guardará tu cambio y regresarás al panel de edición de respuestas.
+                      </span>
+                      <% } %>
+                </div>
+      </form>
+    </section>
+  </div>
+</body>
+
+</html>

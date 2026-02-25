@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Editar respuestas - Perfil Humano Digital</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="page-main">
+  <div class="main-card">
+    <header class="top-bar">
+      <div class="top-bar-title">
+        Perfil Humano Digital · <span class="pill">Editar respuestas</span>
+      </div>
+      <nav class="top-bar-actions">
+        <a href="/instructions" class="secondary-link">Volver al resumen</a>
+        <form action="/logout" method="GET" style="display:inline; margin-left: 10px;">
+          <button type="submit" class="link-button">Cerrar sesión</button>
+        </form>
+      </nav>
+    </header>
+
+    <section class="section-header">
+      <h1>Selecciona la pregunta que deseas modificar</h1>
+      <p>
+        Has completado las <strong><%= totalQuestions %></strong> preguntas.
+        Aquí puedes elegir cualquier pregunta para revisar o cambiar tu respuesta.
+      </p>
+    </section>
+
+    <section class="questions-grid">
+      <% questions.forEach(function(q, index) { 
+        const num = index + 1;
+        const answered = answersByQuestion[num];
+      %>
+        <article class="question-card <%= answered ? 'question-card-answered' : 'question-card-pending' %>">
+          <header class="question-card-header">
+            <span class="pill">P<%= num %></span>
+            <% if (answered) { %>
+              <span class="answer-status answer-status-ok">Contestada</span>
+            <% } else { %>
+              <span class="answer-status answer-status-pending">Sin respuesta</span>
+            <% } %>
+          </header>
+          <p class="question-preview">
+            <%= q.text %>
+          </p>
+          <div class="question-card-actions">
+            <a href="/question/<%= num %>?mode=edit" class="secondary-button">
+              Editar
+            </a>
+          </div>
+        </article>
+      <% }); %>
+    </section>
+  </div>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Crear cuenta - Perfil Humano Digital</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="page-auth">
+  <div class="auth-layout">
+
+    <!-- Columna izquierda: banner + mensaje -->
+    <section class="auth-visual">
+      <img
+        src="/img/perfil-humano-digital-banner.png"
+        alt="Perfil Humano Digital"
+        class="auth-banner"
+      />
+
+      <div class="auth-visual-text">
+        <h1>Comienza tu Perfil Humano Digital</h1>
+        <p>
+          Crea tu cuenta para responder el cuestionario y construir tu
+          <strong>Perfil Humano Digital</strong>.
+        </p>
+        <ul>
+          <li>Tu progreso se guarda automáticamente.</li>
+          <li>Podrás continuar en cualquier momento.</li>
+          <li>Tus respuestas son confidenciales.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Columna derecha: formulario -->
+    <section class="auth-form-card">
+      <header class="auth-form-header">
+        <h2>Crear cuenta</h2>
+        <p>Ingresa tus datos para registrarte en la plataforma.</p>
+      </header>
+
+      <% if (error) { %>
+        <div class="alert"><%= error %></div>
+      <% } %>
+
+      <form method="POST" action="/register" class="form">
+        <label>Nombre completo
+          <input type="text" name="name" required autocomplete="name">
+        </label>
+
+        <label>Correo electrónico
+          <input type="email" name="email" required autocomplete="email">
+        </label>
+
+        <label>Contraseña
+          <input type="password" name="password" required autocomplete="new-password">
+        </label>
+
+        <label>Confirmar contraseña
+          <input type="password" name="passwordConfirm" required autocomplete="new-password">
+        </label>
+
+        <button type="submit" class="primary-button full-width">
+          Registrarme
+        </button>
+      </form>
+
+      <p class="auth-footer-text">
+        ¿Ya tienes cuenta?
+        <a href="/login">Inicia sesión</a>
+      </p>
+    </section>
+
+  </div>
+</body>
+</html>
