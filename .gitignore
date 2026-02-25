@@ -1,0 +1,8 @@
+# Ignorar node_modules (nunca subirla a Git)
+node_modules/
+
+# Otros comunes (opcional pero recomendado)
+.DS_Store
+*.log
+.env
+database.sqlite   # Si no quieres subir la DB cada vez (puedes regenerarla o usar otra estrategia)
