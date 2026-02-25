@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css"> <!-- Si tienes CSS, ajústalo -->
+</head>
+<body>
+  <h1>Perfil Digital Humano</h1>
+  <p><%= message %></p>
+
+  <% if (user) { %>
+    <p>Bienvenido, <%= user.username %> | <a href="/logout">Cerrar sesión</a></p>
+  <% } else { %>
+    <p><a href="/login">Iniciar sesión</a> | <a href="/register">Registrarse</a></p>
+  <% } %>
+
+  <!-- Agrega aquí tu contenido principal -->
+  <a href="/questionnaire">Ir al cuestionario</a> | 
+  <a href="/admin">Panel de administración</a>
+</body>
+</html>
