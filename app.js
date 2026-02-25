@@ -1,18 +1,18 @@
 const express = require('express');
 const path = require('path');
 const session = require('express-session');
-const bcrypt = require('bcrypt'); // Si lo usas directamente aquí o en rutas
+const bcrypt = require('bcrypt'); // Para hashing de contraseñas
 
 // Temporal: SQLite hasta migrar a Postgres
 const sqlite3 = require('sqlite3').verbose();
 
-// Tu conexión a la base de datos
-const db = require('./db.js'); // Asegúrate de que db.js exporte lo necesario
+// Conexión a la base de datos
+const db = require('./db.js'); // Asegúrate de que db.js exporte funciones correctas
 
-// Importar las rutas reales que tienes en la carpeta routes/
-const authRoutes          = require('./routes/auth');
-const adminRoutes         = require('./routes/admin');
-const questionnaireRoutes = require('./routes/questionnaire');
+// Importar rutas reales de la carpeta routes/
+const authRoutes = require('./routes/auth');             // Login, registro, etc.
+const adminRoutes = require('./routes/admin');           // Rutas de admin
+const questionnaireRoutes = require('./routes/questionnaire'); // Cuestionario y perfil
 
 const app = express();
 
@@ -20,48 +20,46 @@ const app = express();
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Middleware para parsear body (formularios y JSON)
+// Parseo de body para formularios y JSON
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Archivos estáticos (CSS, JS, imágenes en /public)
+// Archivos estáticos desde public/
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Sesiones con express-session
+// Configuración de sesiones
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'tu-secreto-super-seguro-aqui-123456',
+  secret: process.env.SESSION_SECRET || 'tu-secreto-muy-seguro-1234567890', // Usa variable de entorno en Render
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 } // 1 día
+  cookie: { secure: process.env.NODE_ENV === 'production', maxAge: 24 * 60 * 60 * 1000 } // Secure en producción
 }));
 
-// Middleware para pasar el usuario a todas las vistas (opcional pero útil)
+// Middleware para pasar usuario a vistas
 app.use((req, res, next) => {
   res.locals.user = req.session.user || null;
   next();
 });
 
-// Montar las rutas en los paths correspondientes
-app.use('/',              authRoutes);           // login, registro, logout, posiblemente home
-app.use('/admin',         adminRoutes);          // rutas de administración
-app.use('/questionnaire', questionnaireRoutes);  // cuestionario, preguntas, perfil, etc.
+// Montar rutas
+app.use('/', authRoutes);
+app.use('/admin', adminRoutes);
+app.use('/questionnaire', questionnaireRoutes);
 
-// Ruta de health para mantener la app despierta (cron job)
+// Ruta health para cron job (evitar sleep)
 app.get('/health', (req, res) => {
-  res.status(200).send('OK - App is alive');
+  res.status(200).send('OK - Perfil Digital Humano is alive');
 });
 
-// Ruta raíz (home o landing) – si no está definida en auth.js
+// Ruta raíz si no está en auth.js
 app.get('/', (req, res) => {
   res.render('index', {
     title: 'Perfil Digital Humano',
-    message: req.session.user 
-      ? `¡Bienvenido, ${req.session.user.username}!` 
-      : 'Inicia sesión para continuar'
+    message: req.session.user ? `Bienvenido, ${req.session.user.username || 'Usuario'}` : 'Inicia sesión'
   });
 });
 
-// Middleware de autenticación (ejemplo simple – úsalo donde necesites proteger rutas)
+// Middleware de autenticación (protección formal)
 function isAuthenticated(req, res, next) {
   if (req.session.user) {
     return next();
@@ -69,15 +67,27 @@ function isAuthenticated(req, res, next) {
   res.redirect('/login');
 }
 
-// Manejo de 404 – página no encontrada
-app.use((req, res) => {
-  res.status(404).render('404', { title: 'Página no encontrada' });
-});
+// Descomenta para proteger admin (ejemplo formal)
+ // app.use('/admin', isAuthenticated, adminRoutes);
 
-// Manejo de errores generales → CAMBIO AQUÍ: usamos .send en lugar de .render
+// Manejo de 404 (página no encontrada)
+// Manejo de errores generales – MODO DIAGNÓSTICO
 app.use((err, req, res, next) => {
+  console.error('=====================================');
+  console.error('ERROR GRAVE EN LA APLICACIÓN');
+  console.error('Ruta solicitada:', req.method, req.originalUrl);
+  console.error('Mensaje del error:', err.message);
+  console.error('Stack trace completo:');
   console.error(err.stack);
-  res.status(500).send('Error interno del servidor. Por favor intenta más tarde.');
+  console.error('=====================================');
+
+  // Mostrar detalles en el navegador SOLO para diagnóstico (luego lo quitamos)
+  res.status(500).send(`
+    <h1>Error interno del servidor</h1>
+    <p>Mensaje: ${err.message || 'desconocido'}</p>
+    <pre>${err.stack || 'No hay stack disponible'}</pre>
+    <p>Revisa los logs de Render para más detalles.</p>
+  `);
 });
 
 // Puerto dinámico para Render
@@ -85,8 +95,7 @@ const port = process.env.PORT || 3000;
 
 app.listen(port, () => {
   console.log(`Servidor corriendo en puerto ${port}`);
-  console.log(`Accede en: http://localhost:${port} (local) o tu URL de Render`);
+  console.log(`Accede en: http://localhost:${port} (local) o https://perfil-humano.onrender.com`);
 });
 
-// Exporta la app (opcional)
 module.exports = app;
