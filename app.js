@@ -10,8 +10,8 @@ const sqlite3 = require('sqlite3').verbose();
 const db = require('./db.js'); // Asegúrate de que db.js exporte lo necesario
 
 // Importar las rutas reales que tienes en la carpeta routes/
-const authRoutes         = require('./routes/auth');
-const adminRoutes        = require('./routes/admin');
+const authRoutes          = require('./routes/auth');
+const adminRoutes         = require('./routes/admin');
 const questionnaireRoutes = require('./routes/questionnaire');
 
 const app = express();
@@ -29,7 +29,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Sesiones con express-session
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'tu-secreto-super-seguro-aqui-123456', // ¡Cambia esto o usa variable de entorno!
+  secret: process.env.SESSION_SECRET || 'tu-secreto-super-seguro-aqui-123456',
   resave: false,
   saveUninitialized: false,
   cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 } // 1 día
@@ -69,21 +69,18 @@ function isAuthenticated(req, res, next) {
   res.redirect('/login');
 }
 
-// Ejemplo: proteger rutas de admin (descomenta si lo necesitas)
-// app.use('/admin', isAuthenticated, adminRoutes);
-
 // Manejo de 404 – página no encontrada
 app.use((req, res) => {
   res.status(404).render('404', { title: 'Página no encontrada' });
 });
 
-// Manejo de errores generales
+// Manejo de errores generales → CAMBIO AQUÍ: usamos .send en lugar de .render
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).render('500', { title: 'Error en el servidor' });
+  res.status(500).send('Error interno del servidor. Por favor intenta más tarde.');
 });
 
-// Puerto dinámico para Render (muy importante)
+// Puerto dinámico para Render
 const port = process.env.PORT || 3000;
 
 app.listen(port, () => {
@@ -91,5 +88,5 @@ app.listen(port, () => {
   console.log(`Accede en: http://localhost:${port} (local) o tu URL de Render`);
 });
 
-// Exporta la app (opcional, útil para tests)
+// Exporta la app (opcional)
 module.exports = app;
