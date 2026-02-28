@@ -1,57 +1,163 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Editar respuestas - Perfil Humano Digital</title>
-  <link rel="stylesheet" href="/css/styles.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: #eaf0f6;
+      padding: 24px;
+      color: #111827;
+    }
+
+    .topbar {
+      max-width: 1100px;
+      margin: 0 auto 20px auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .topbar a {
+      text-decoration: none;
+      color: #2563eb;
+      font-weight: bold;
+      margin-left: 12px;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 20px;
+      padding: 32px;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      margin-bottom: 24px;
+      color: #6b7280;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .card {
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 18px;
+      background: #f8fafc;
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .pill {
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: bold;
+    }
+
+    .pill-ok {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .pill-empty {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .question-text {
+      margin: 10px 0 14px 0;
+      line-height: 1.5;
+    }
+
+    .answer-box {
+      margin: 10px 0 14px 0;
+      padding: 12px;
+      border-radius: 12px;
+      background: #fff;
+      border: 1px solid #dbe3ea;
+      color: #374151;
+    }
+
+    .actions a {
+      display: inline-block;
+      padding: 10px 16px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: bold;
+      background: #2563eb;
+      color: white;
+    }
+  </style>
 </head>
-<body class="page-main">
-  <div class="main-card">
-    <header class="top-bar">
-      <div class="top-bar-title">
-        Perfil Humano Digital · <span class="pill">Editar respuestas</span>
-      </div>
-      <nav class="top-bar-actions">
-        <a href="/instructions" class="secondary-link">Volver al resumen</a>
-        <form action="/logout" method="GET" style="display:inline; margin-left: 10px;">
-          <button type="submit" class="link-button">Cerrar sesión</button>
-        </form>
-      </nav>
-    </header>
+<body>
+  <div class="topbar">
+    <div><strong>Perfil Humano Digital · Editar respuestas</strong></div>
+    <div>
+      <a href="/questionnaire/instructions">Volver al resumen</a>
+      <a href="/logout">Cerrar sesión</a>
+    </div>
+  </div>
 
-    <section class="section-header">
-      <h1>Selecciona la pregunta que deseas modificar</h1>
-      <p>
-        Has completado las <strong><%= totalQuestions %></strong> preguntas.
-        Aquí puedes elegir cualquier pregunta para revisar o cambiar tu respuesta.
-      </p>
-    </section>
+  <div class="container">
+    <h1>Selecciona la pregunta que deseas modificar</h1>
+    <p class="subtitle">
+      Has completado las <%= totalQuestions %> preguntas. Aquí puedes revisar o cambiar cualquier respuesta.
+    </p>
 
-    <section class="questions-grid">
+    <div class="grid">
       <% questions.forEach(function(q, index) { 
-        const num = index + 1;
-        const answered = answersByQuestion[num];
+           const num = index + 1;
+           const answered = answersByQuestion[num];
       %>
-        <article class="question-card <%= answered ? 'question-card-answered' : 'question-card-pending' %>">
-          <header class="question-card-header">
-            <span class="pill">P<%= num %></span>
+        <div class="card">
+          <div class="card-top">
+            <strong>Pregunta <%= num %></strong>
             <% if (answered) { %>
-              <span class="answer-status answer-status-ok">Contestada</span>
+              <span class="pill pill-ok">Contestada</span>
             <% } else { %>
-              <span class="answer-status answer-status-pending">Sin respuesta</span>
+              <span class="pill pill-empty">Sin respuesta</span>
             <% } %>
-          </header>
-          <p class="question-preview">
-            <%= q.text %>
-          </p>
-          <div class="question-card-actions">
-            <a href="/question/<%= num %>?mode=edit" class="secondary-button">
-              Editar
-            </a>
           </div>
-        </article>
+
+          <div class="question-text"><%= q.text %></div>
+
+          <div class="answer-box">
+            <strong>Respuesta actual:</strong>
+            <div><%= answered || 'Sin respuesta registrada' %></div>
+          </div>
+
+          <div class="actions">
+            <a href="/questionnaire/question/<%= num %>?mode=edit">Editar</a>
+          </div>
+        </div>
       <% }); %>
-    </section>
+    </div>
   </div>
 </body>
 </html>

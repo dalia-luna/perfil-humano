@@ -7,14 +7,12 @@
   <style>
     * {
       box-sizing: border-box;
-      margin: 0;
-      padding: 0;
       font-family: Arial, sans-serif;
     }
 
     body {
+      margin: 0;
       background: #eaf0f6;
-      min-height: 100vh;
       padding: 24px;
       color: #111827;
     }
@@ -25,15 +23,11 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
     }
 
-    .brand {
-      font-size: 1.2rem;
-      font-weight: bold;
-      color: #0f172a;
-    }
-
-    .logout {
+    .topbar a {
       text-decoration: none;
       color: #2563eb;
       font-weight: bold;
@@ -50,7 +44,6 @@
 
     h1 {
       margin-bottom: 16px;
-      font-size: 2rem;
     }
 
     p {
@@ -94,28 +87,38 @@
 
     .actions {
       margin-top: 28px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
     }
 
-    button {
+    button,
+    .secondary-link {
       padding: 14px 28px;
       border: none;
       border-radius: 999px;
-      background: #2563eb;
-      color: white;
+      text-decoration: none;
       font-size: 1rem;
       font-weight: bold;
       cursor: pointer;
+      display: inline-block;
     }
 
-    button:hover {
-      background: #1d4ed8;
+    button {
+      background: #2563eb;
+      color: white;
+    }
+
+    .secondary-link {
+      background: #e5e7eb;
+      color: #111827;
     }
   </style>
 </head>
 <body>
   <div class="topbar">
-    <div class="brand">Perfil Humano Digital · Cuestionario</div>
-    <a class="logout" href="/logout">Cerrar sesión</a>
+    <div><strong>Perfil Humano Digital · Cuestionario</strong></div>
+    <div><a href="/logout">Cerrar sesión</a></div>
   </div>
 
   <div class="container">
@@ -126,7 +129,6 @@
       Tus respuestas nos ayudarán a construir tu Perfil Humano Digital.
     </p>
 
-    <h2>¿Cómo funciona?</h2>
     <ul>
       <li>Responde cada pregunta de forma honesta y reflexiva.</li>
       <li>No hay respuestas correctas o incorrectas.</li>
@@ -163,6 +165,10 @@
       <form action="/questionnaire/instructions/start" method="POST">
         <button type="submit"><%= buttonLabel %></button>
       </form>
+
+      <% if (lastQuestion >= totalQuestions) { %>
+        <a class="secondary-link" href="/questionnaire/edit-answers">Ver resumen de respuestas</a>
+      <% } %>
     </div>
   </div>
 </body>

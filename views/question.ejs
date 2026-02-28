@@ -1,107 +1,287 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pregunta <%= number %> - Perfil Humano Digital</title>
-  <link rel="stylesheet" href="/css/styles.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: #eaf0f6;
+      padding: 24px;
+      color: #111827;
+    }
+
+    .topbar {
+      max-width: 950px;
+      margin: 0 auto 20px auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .topbar-left,
+    .topbar-right {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .topbar a {
+      text-decoration: none;
+      color: #2563eb;
+      font-weight: bold;
+    }
+
+    .container {
+      max-width: 950px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 20px;
+      padding: 32px;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
+    }
+
+    h1 {
+      margin-bottom: 8px;
+      font-size: 2rem;
+    }
+
+    .subtitle {
+      color: #6b7280;
+      margin-bottom: 24px;
+    }
+
+    .progress-wrap {
+      margin-bottom: 28px;
+    }
+
+    .progress-label {
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 14px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #2563eb, #22c55e);
+    }
+
+    .question-box {
+      margin-bottom: 24px;
+      padding: 20px;
+      border-radius: 16px;
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+    }
+
+    .question-text {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 18px;
+      line-height: 1.5;
+    }
+
+    .question-image {
+      margin: 14px 0 18px 0;
+      text-align: center;
+    }
+
+    .question-image img {
+      max-width: 100%;
+      border-radius: 14px;
+      border: 1px solid #dbe3ea;
+      background: #fff;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    textarea,
+    select,
+    input[type="text"] {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid #cbd5e1;
+      font-size: 1rem;
+      margin-bottom: 20px;
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .radio-group {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .radio-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border: 1px solid #dbe3ea;
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    .radio-item label {
+      margin: 0;
+      font-weight: normal;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    button,
+    .secondary-link {
+      padding: 14px 22px;
+      border: none;
+      border-radius: 999px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    button {
+      background: #2563eb;
+      color: white;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    .secondary-link {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .helper {
+      margin-top: 14px;
+      color: #6b7280;
+      font-size: 0.95rem;
+    }
+  </style>
 </head>
+<body>
+  <div class="topbar">
+    <div class="topbar-left">
+      <strong>Perfil Humano Digital · Pregunta <%= number %> / <%= totalQuestions %></strong>
+    </div>
 
-<body class="page-main">
-  <div class="main-card">
-    <header class="top-bar">
-      <div class="top-bar-title">
-        Perfil Humano Digital ·
-        <span class="pill">Pregunta <%= number %> / <%= totalQuestions %></span>
+    <div class="topbar-right">
+      <a href="<%= mode === 'edit' ? '/questionnaire/edit-answers' : '/questionnaire/instructions' %>">
+        <%= mode === 'edit' ? 'Volver a editar respuestas' : 'Volver al resumen' %>
+      </a>
+      <a href="/logout">Cerrar sesión</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <h1>Pregunta <%= number %></h1>
+    <p class="subtitle">Responde y guarda para continuar.</p>
+
+    <div class="progress-wrap">
+      <div class="progress-label">Avance: <%= progressPercent.toFixed(1) %>%</div>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width: <%= progressPercent %>%;"></div>
       </div>
-      <nav class="top-bar-actions">
-        <a href="<%= mode === 'edit' ? '/edit-answers' : '/instructions' %>" class="secondary-link">
-          <%= mode==='edit' ? 'Volver a editar respuestas' : 'Volver al resumen' %>
-        </a>
-        <form action="/logout" method="GET" style="display:inline; margin-left: 10px;">
-          <button type="submit" class="link-button">Cerrar sesión</button>
-        </form>
-      </nav>
-    </header>
+    </div>
 
-    <section class="question-header">
-      <div class="question-progress-wrapper">
-        <div class="progress progress-large">
-          <div class="progress-bar" style="width: <%= progressPercent %>%;"></div>
-        </div>
-        <p class="progress-text">
-          Avance: <strong>
-            <%= progressPercent.toFixed(1) %>%
-          </strong>
-        </p>
-      </div>
+    <form action="/questionnaire/question/<%= number %>" method="POST">
+      <input type="hidden" name="mode" value="<%= mode %>" />
 
-      <h1>Pregunta <%= number %>
-      </h1>
-      <p class="question-text">
-        <%= question.text %>
-      </p>
-      <% if (question.image) { %>
-        <div class="question-image-wrapper">
-          <img src="<%= question.image %>" alt="Ilustración de la pregunta <%= number %>" class="question-image">
-        </div>
+      <div class="question-box">
+        <div class="question-text"><%= question.text %></div>
+
+        <% if (question.image) { %>
+          <div class="question-image">
+            <img src="<%= question.image %>" alt="Imagen de apoyo de la pregunta" />
+          </div>
         <% } %>
 
-    </section>
+        <% if (question.type === 'select') { %>
+          <label for="answer">Selecciona la opción que mejor te describe:</label>
+          <select id="answer" name="answer" required>
+            <option value="">Selecciona una opción...</option>
+            <% question.options.forEach(function(opt) { %>
+              <option value="<%= opt %>" <%= existingAnswer === opt ? 'selected' : '' %>><%= opt %></option>
+            <% }); %>
+          </select>
 
-    <section class="question-body">
-      <form method="POST" action="/question/<%= number %>" class="form">
-        <!-- Indicador de modo (normal vs edición) -->
-        <input type="hidden" name="mode" value="<%= mode %>">
-
-        <% if (question.type==='select' ) { %>
-          <label>Selecciona la opción que mejor te describe:
-            <select name="answer" class="select-control" required>
-              <option value="">Selecciona una opción...</option>
-              <% question.options.forEach(function(opt) { %>
-                <option value="<%= opt %>" <%=existingAnswer===opt ? 'selected' : '' %>><%= opt %>
-                </option>
-                <% }); %>
-            </select>
-          </label>
-          <% } else if (question.type==='radio' ) { %>
-            <fieldset class="option-list">
-              <legend>Selecciona la opción que mejor te describe:</legend>
-              <% question.options.forEach(function(opt) { %>
-                <label class="radio-item">
-                  <input type="radio" name="answer" value="<%= opt %>" <%=existingAnswer===opt ? 'checked' : '' %>
+        <% } else if (question.type === 'radio') { %>
+          <label>Selecciona la opción que mejor te describe:</label>
+          <div class="radio-group">
+            <% question.options.forEach(function(opt, index) { %>
+              <div class="radio-item">
+                <input
+                  type="radio"
+                  id="opt_<%= index %>"
+                  name="answer"
+                  value="<%= opt %>"
+                  <%= existingAnswer === opt ? 'checked' : '' %>
                   required
-                  >
-                  <span>
-                    <%= opt %>
-                  </span>
-                </label>
-                <% }); %>
-            </fieldset>
-            <% } else { %>
-              <!-- Fallback por si en el futuro agregas otro tipo -->
-              <label>Tu respuesta:
-                <textarea name="answer" rows="6" required><%= existingAnswer %></textarea>
-              </label>
-              <% } %>
+                />
+                <label for="opt_<%= index %>"><%= opt %></label>
+              </div>
+            <% }); %>
+          </div>
 
-                <div class="question-actions">
-                  <button type="submit" class="primary-button">
-                    <%= number===totalQuestions && mode==='normal' ? 'Guardar y finalizar' : 'Guardar' %>
-                  </button>
-                  <% if (mode==='normal' && number < totalQuestions) { %>
-                    <span class="hint-text">
-                      Se guardará tu respuesta y continuarás con la siguiente pregunta.
-                    </span>
-                    <% } else if (mode==='edit' ) { %>
-                      <span class="hint-text">
-                        Se guardará tu cambio y regresarás al panel de edición de respuestas.
-                      </span>
-                      <% } %>
-                </div>
-      </form>
-    </section>
+        <% } else { %>
+          <label for="answer">Tu respuesta:</label>
+          <textarea id="answer" name="answer" required><%= existingAnswer || '' %></textarea>
+        <% } %>
+      </div>
+
+      <div class="actions">
+        <button type="submit">
+          <%= number === totalQuestions && mode === 'normal' ? 'Guardar y finalizar' : 'Guardar' %>
+        </button>
+
+        <a class="secondary-link" href="/questionnaire/edit-answers">Ir al resumen</a>
+      </div>
+
+      <div class="helper">
+        <% if (mode === 'normal' && number < totalQuestions) { %>
+          Se guardará tu respuesta y continuarás con la siguiente pregunta.
+        <% } else if (mode === 'edit') { %>
+          Se guardará tu cambio y regresarás al panel de edición de respuestas.
+        <% } else { %>
+          Se guardará tu respuesta.
+        <% } %>
+      </div>
+    </form>
   </div>
 </body>
-
 </html>
