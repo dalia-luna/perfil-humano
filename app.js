@@ -39,7 +39,7 @@ app.use(
   })
 );
 
-// Pasar usuario a vistas
+// Pasar sesión a vistas
 app.use((req, res, next) => {
   res.locals.user = req.session.userId || null;
   res.locals.role = req.session.role || null;
