@@ -5,7 +5,7 @@ const questions = require('../questions');
 const router = express.Router();
 const TOTAL_QUESTIONS = questions.length;
 
-// Middleware: exige estar logueado como usuario (no admin)
+// Middleware: solo usuarios logueados (no admin)
 function requireUser(req, res, next) {
   if (!req.session.userId) {
     return res.redirect('/login');

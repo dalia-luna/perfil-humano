@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 const session = require('express-session');
 
-// Conexión a DB
+// Inicializa la base de datos
 require('./db.js');
 
 // Rutas
@@ -12,18 +12,16 @@ const questionnaireRoutes = require('./routes/questionnaire');
 
 const app = express();
 
-// Importante en Railway / proxies
+// Importante en Railway
 app.set('trust proxy', 1);
 
-// Configuración EJS
+// Configuración de vistas
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Parse body
+// Middlewares
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-
-// Archivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Sesiones
@@ -39,7 +37,7 @@ app.use(
   })
 );
 
-// Pasar sesión a vistas
+// Variables globales para vistas
 app.use((req, res, next) => {
   res.locals.user = req.session.userId || null;
   res.locals.role = req.session.role || null;
@@ -61,13 +59,13 @@ app.get('/', (req, res) => {
   }
 
   res.render('login', {
-    title: 'Iniciar Sesión - Perfil Digital Humano',
+    title: 'Iniciar Sesión - Perfil Humano Digital',
     error: null,
     message: null
   });
 });
 
-// Ruta health
+// Healthcheck
 app.get('/health', (req, res) => {
   res.status(200).send('OK - App is alive');
 });
@@ -77,7 +75,7 @@ app.use((req, res) => {
   res.status(404).send('Página no encontrada. <a href="/login">Ir al login</a>');
 });
 
-// Errores 500
+// Manejo de errores
 app.use((err, req, res, next) => {
   console.error('=====================================');
   console.error('ERROR GRAVE EN LA APLICACIÓN');

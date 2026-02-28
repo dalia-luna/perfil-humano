@@ -26,7 +26,6 @@ router.post('/register', (req, res) => {
     });
   }
 
-  // El primer usuario será admin; los demás, user
   const countQuery = 'SELECT COUNT(*) AS total FROM users';
 
   db.get(countQuery, (countErr, row) => {
@@ -65,11 +64,9 @@ router.post('/register', (req, res) => {
           return res.render('register', { error: msg });
         }
 
-        // Guardar sesión
         req.session.userId = this.lastID;
         req.session.role = role;
 
-        // Redirigir según rol
         if (role === 'admin') {
           return res.redirect('/admin/dashboard');
         }
@@ -143,11 +140,9 @@ router.post('/login', (req, res) => {
         });
       }
 
-      // Guardar sesión
       req.session.userId = user.id;
       req.session.role = user.role;
 
-      // Redirigir según rol
       if (user.role === 'admin') {
         return res.redirect('/admin/dashboard');
       }
