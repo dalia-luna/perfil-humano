@@ -1,14 +1,14 @@
 {
   "name": "perfil-humano",
   "version": "1.0.0",
-  "description": "",
-  "main": "app.js",                  
-    "scripts": {
-    "start": "node app.js",         
+  "description": "App de perfil digital con cuestionarios y admin",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["perfil", "digital", "humano"],
+  "author": "Dalia",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {

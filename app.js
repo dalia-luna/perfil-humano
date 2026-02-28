@@ -1,20 +1,19 @@
 const express = require('express');
 const path = require('path');
 const session = require('express-session');
-const bcrypt = require('bcrypt');
-
-// Temporal: SQLite hasta migrar a Postgres
-const sqlite3 = require('sqlite3').verbose();
 
 // Conexión a DB
-const db = require('./db.js');
+require('./db.js');
 
-// Rutas reales
+// Rutas
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const questionnaireRoutes = require('./routes/questionnaire');
 
 const app = express();
+
+// Importante en Railway / proxies
+app.set('trust proxy', 1);
 
 // Configuración EJS
 app.set('view engine', 'ejs');
@@ -28,16 +27,22 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Sesiones
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'tu-secreto-super-seguro-1234567890',
-  resave: false,
-  saveUninitialized: false,
-  cookie: { secure: process.env.NODE_ENV === 'production', maxAge: 24 * 60 * 60 * 1000 }
-}));
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'tu-secreto-super-seguro-1234567890',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 24 * 60 * 60 * 1000
+    }
+  })
+);
 
 // Pasar usuario a vistas
 app.use((req, res, next) => {
-  res.locals.user = req.session.user || null;
+  res.locals.user = req.session.userId || null;
+  res.locals.role = req.session.role || null;
   next();
 });
 
@@ -46,43 +51,33 @@ app.use('/', authRoutes);
 app.use('/admin', adminRoutes);
 app.use('/questionnaire', questionnaireRoutes);
 
-// Ruta principal: FORMULARIO DE LOGIN
+// Ruta principal
 app.get('/', (req, res) => {
-  // Si ya está logueado → redirigir a cuestionario (o donde prefieras)
-  if (req.session.user) {
-    return res.redirect('/questionnaire');
+  if (req.session.userId) {
+    if (req.session.role === 'admin') {
+      return res.redirect('/admin/dashboard');
+    }
+    return res.redirect('/questionnaire/instructions');
   }
 
-  // Mostrar formulario de login
-  res.render('login', {   // ← Cambia 'login' por el nombre REAL de tu archivo EJS (sin .ejs)
+  res.render('login', {
     title: 'Iniciar Sesión - Perfil Digital Humano',
-    error: null,          // Para mostrar errores (ej. credenciales inválidas)
-    message: null         // Mensaje opcional
+    error: null,
+    message: null
   });
 });
 
-// Ruta health (para cron anti-sleep)
+// Ruta health
 app.get('/health', (req, res) => {
   res.status(200).send('OK - App is alive');
 });
 
-// Middleware de autenticación (para proteger rutas)
-function isAuthenticated(req, res, next) {
-  if (req.session.user) {
-    return next();
-  }
-  res.redirect('/');
-}
-
-// Ejemplo: proteger admin
-// app.use('/admin', isAuthenticated, adminRoutes);
-
 // 404
 app.use((req, res) => {
-  res.status(404).send('Página no encontrada. <a href="/">Ir al login</a>');
+  res.status(404).send('Página no encontrada. <a href="/login">Ir al login</a>');
 });
 
-// Errores 500 con logging completo
+// Errores 500
 app.use((err, req, res, next) => {
   console.error('=====================================');
   console.error('ERROR GRAVE EN LA APLICACIÓN');

@@ -1,67 +1,60 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Iniciar sesión - Perfil Humano Digital</title>
-  <link rel="stylesheet" href="/css/styles.css">
-</head>
-<body class="page-auth">
-  <div class="auth-layout">
+router.post('/login', async (req, res) => {
+  const { email, password } = req.body;  // ← Cambiado: email en vez de username
 
-    <!-- Columna izquierda: banner + mensaje -->
-    <section class="auth-visual">
-      <img
-        src="/img/perfil-humano-digital-banner.png"
-        alt="Perfil Humano Digital"
-        class="auth-banner"
-      />
+  console.log('Intento de login con email:', { email });
 
-      <div class="auth-visual-text">
-        <h1>Bienvenido(a) al Perfil Humano Digital</h1>
-        <p>
-          Construye tu <strong>perfil humano digital</strong> respondiendo un
-          cuestionario diseñado para capturar tus rasgos, decisiones y estilo
-          personal.
-        </p>
-        <ul>
-          <li>Avance guardado automáticamente en cada pregunta.</li>
-          <li>Puedes cerrar sesión y continuar donde te quedaste.</li>
-          <li>Tu información se maneja con confidencialidad.</li>
-        </ul>
-      </div>
-    </section>
+  try {
+    // Buscar usuario SOLO por email (asumiendo que tu tabla tiene columna 'email')
+    const user = await new Promise((resolve, reject) => {
+      db.get(
+        'SELECT * FROM users WHERE email = ?',
+        [email],
+        (err, row) => {
+          if (err) reject(err);
+          resolve(row);
+        }
+      );
+    });
 
-    <!-- Columna derecha: formulario -->
-    <section class="auth-form-card">
-      <header class="auth-form-header">
-        <h2>Inicia sesión</h2>
-        <p>Accede a tu perfil humano digital para continuar el cuestionario.</p>
-      </header>
+    console.log('Usuario encontrado:', user ? 'SÍ' : 'NO');
 
-      <% if (error) { %>
-        <div class="alert"><%= error %></div>
-      <% } %>
+    if (!user) {
+      console.log('Usuario no encontrado');
+      return res.render('login', {
+        title: 'Iniciar Sesión',
+        error: 'Correo o contraseña incorrectos'
+      });
+    }
 
-      <form method="POST" action="/login" class="form">
-        <label>Correo electrónico
-          <input type="email" name="email" autocomplete="email" required>
-        </label>
+    // Comparar contraseña
+    const match = await bcrypt.compare(password, user.password);
+    console.log('Contraseña coincide:', match);
 
-        <label>Contraseña
-          <input type="password" name="password" autocomplete="current-password" required>
-        </label>
+    if (!match) {
+      console.log('Contraseña incorrecta');
+      return res.render('login', {
+        title: 'Iniciar Sesión',
+        error: 'Correo o contraseña incorrectos'
+      });
+    }
 
-        <button type="submit" class="primary-button full-width">
-          Entrar
-        </button>
-      </form>
+    // Guardar sesión
+    req.session.user = {
+      id: user.id,
+      email: user.email,
+      // Agrega otros campos si necesitas: username: user.username || email, etc.
+    };
 
-      <p class="auth-footer-text">
-        ¿Aún no tienes cuenta?
-        <a href="/register">Crear cuenta para iniciar tu Perfil Humano Digital</a>
-      </p>
-    </section>
+    console.log('Sesión guardada para:', user.email);
 
-  </div>
-</body>
-</html>
+    // Redirigir después de login exitoso
+    res.redirect('/questionnaire');  // Cambia a donde quieras ir después
+
+  } catch (err) {
+    console.error('Error en login:', err);
+    res.render('login', {
+      title: 'Iniciar Sesión',
+      error: 'Error interno. Intenta más tarde.'
+    });
+  }
+});

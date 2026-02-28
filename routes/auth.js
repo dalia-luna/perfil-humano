@@ -5,12 +5,12 @@ const db = require('../db');
 const router = express.Router();
 const SALT_ROUNDS = 10;
 
-// GET /register - mostrar formulario de registro
+// GET /register
 router.get('/register', (req, res) => {
   res.render('register', { error: null });
 });
 
-// POST /register - procesar registro
+// POST /register
 router.post('/register', (req, res) => {
   const { name, email, password, passwordConfirm } = req.body;
 
@@ -22,7 +22,6 @@ router.post('/register', (req, res) => {
     return res.render('register', { error: 'Las contraseñas no coinciden.' });
   }
 
-  // Saber cuántos usuarios existen para que el primero sea admin
   const countQuery = 'SELECT COUNT(*) AS total FROM users';
   db.get(countQuery, (countErr, row) => {
     if (countErr) {
@@ -39,7 +38,11 @@ router.post('/register', (req, res) => {
         return res.render('register', { error: 'Error al registrar. Intenta de nuevo.' });
       }
 
-      const stmt = `INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)`;
+      const stmt = `
+        INSERT INTO users (name, email, password_hash, role)
+        VALUES (?, ?, ?, ?)
+      `;
+
       db.run(stmt, [name, email, hash, role], function (dbErr) {
         if (dbErr) {
           console.error(dbErr);
@@ -50,25 +53,25 @@ router.post('/register', (req, res) => {
           return res.render('register', { error: msg });
         }
 
-        // Guardar ID y rol de usuario en sesión
         req.session.userId = this.lastID;
         req.session.role = role;
 
         if (role === 'admin') {
           return res.redirect('/admin/dashboard');
         }
-        res.redirect('/instructions');
+
+        return res.redirect('/questionnaire/instructions');
       });
     });
   });
 });
 
-// GET /login - mostrar formulario de login
+// GET /login
 router.get('/login', (req, res) => {
   res.render('login', { error: null });
 });
 
-// POST /login - procesar login
+// POST /login
 router.post('/login', (req, res) => {
   const { email, password } = req.body;
 
@@ -76,7 +79,12 @@ router.post('/login', (req, res) => {
     return res.render('login', { error: 'Ingresa tu correo y contraseña.' });
   }
 
-  const query = `SELECT id, password_hash, role FROM users WHERE email = ?`;
+  const query = `
+    SELECT id, password_hash, role
+    FROM users
+    WHERE email = ?
+  `;
+
   db.get(query, [email], (err, user) => {
     if (err) {
       console.error(err);
@@ -103,12 +111,13 @@ router.post('/login', (req, res) => {
       if (user.role === 'admin') {
         return res.redirect('/admin/dashboard');
       }
-      res.redirect('/instructions');
+
+      return res.redirect('/questionnaire/instructions');
     });
   });
 });
 
-// GET /logout - cerrar sesión
+// GET /logout
 router.get('/logout', (req, res) => {
   req.session.destroy(() => {
     res.redirect('/login');
