@@ -724,8 +724,8 @@ const questions = [
   {
     id: 47,
     type: 'select',
-    text: 'Perforaciones (Rostro)',
-    
+    text: 'Selecciona la presencia de perforaciones (Rostro)',
+    image:'/img/questions/pregunta47.jpg',
     options: [
       'No disponible',
       'Sin Perforaciones',
@@ -737,8 +737,8 @@ const questions = [
   {
     id: 48,
     type: 'select',
-    text: 'Perforaciones (Cuerpo)',
-    
+    text: 'Selecciona la presencia de perforaciones (Cuerpo)',
+    image:'/img/questions/pregunta48.jpg',
     options: [
       'No disponible',
       'Sin Perforaciones',
@@ -751,7 +751,8 @@ const questions = [
   {
     id: 49,
     type: 'select',
-    text: 'Accesorios - Material',
+    text: 'Si posee accesorios, seleccione el tipo de material',
+    image:'/img/questions/pregunta49.jpg',
     options: [
       'No disponible',
       'Fantasía',
@@ -763,7 +764,8 @@ const questions = [
   {
     id: 50,
     type: 'select',
-    text: 'A. Cintura',
+    text: 'Selecciona si existe accesorios en la cintura',
+    image:'/img/questions/pregunta50.png',
     options: [
       'Sin Accesorios',
       'Cinturon',
@@ -775,7 +777,8 @@ const questions = [
   {
     id: 51,
     type: 'select',
-    text: 'Accesorios - Material',
+    text: 'Si presenta accesorios y selecciona cuál es el material',
+    image:'/img/questions/pregunta51.jpg',
     options: [
       'No disponible',
       'Cuero',
@@ -787,17 +790,20 @@ const questions = [
   {
     id: 52,
     type: 'radio',
-    text: 'A. Tobillos',
+    text: 'Accesorios en tobillos',
+    image:'/img/questions/pregunta52.jpg',
     options: [
       'Sin Accesorios',
-      'Tobilleras'
+      'Tobilleras',
+      'Perforaciones'
     ]
   },
 
   {
     id: 53,
     type: 'select',
-    text: 'Accesorios - Material',
+    text: 'Selecciona si presenta accesorios y el tipo de material',
+    image:'/img/questions/pregunta53.jpg',
     options: [
       'No disponible',
       'Fantasía',
@@ -810,11 +816,12 @@ const questions = [
   {
     id: 54,
     type: 'select',
-    text: 'Prótesis',
+    text: 'Selecciona si tiene una prótesis',
+    image:'/img/questions/pregunta54.jpg',
     options: [
       'Sin prótesis',
       'Mama',
-      'Peson',
+      'Pezón',
       'Oreja',
       'Nariz',
       'Ojo',
@@ -840,7 +847,8 @@ const questions = [
   {
     id: 55,
     type: 'radio',
-    text: 'Protesis - Material',
+    text: 'Selecciona el material de la prótesis',
+    image:'/img/questions/pregunta55.jpg',
     options: [
       'No disponible',
       'Platino',
@@ -851,7 +859,8 @@ const questions = [
   {
     id: 56,
     type: 'select',
-    text: 'Métodos Anticonceptivos',
+    text: 'Selecciona si está usando Métodos Anticonceptivos',
+    image:'/img/questions/pregunta56.jpg',
     options: [
       'Sin Método',
       'Implante subcutaneo',
@@ -864,6 +873,7 @@ const questions = [
     id: 57,
     type: 'select',
     text: 'Pieza dental 11',
+    image:'/img/questions/pregunta57.jpg',
     options: [
       'Sin Pieza',
       'Sano',
@@ -883,6 +893,7 @@ const questions = [
     id: 58,
     type: 'select',
     text: 'Pieza dental 12',
+    image:'/img/questions/pregunta58.jpg',
     options: [
       'Sin Pieza',
       'Sano',
@@ -902,6 +913,7 @@ const questions = [
     id: 59,
     type: 'select',
     text: 'Pieza dental 13',
+    image:'/img/questions/pregunta59.jpg',
     options: [
       'Sin Pieza',
       'Sano',
@@ -921,6 +933,7 @@ const questions = [
     id: 60,
     type: 'select',
     text: 'Pieza dental 14',
+    image:'/img/questions/pregunta60.jpg',
     options: [
       'Sin Pieza',
       'Sano',
@@ -940,6 +953,7 @@ const questions = [
     id: 61,
     type: 'select',
     text: 'Pieza dental 15',
+    image:'/img/questions/pregunta61.jpg',
     options: [
       'Sin Pieza',
       'Sano',
@@ -959,6 +973,7 @@ const questions = [
     id: 62,
     type: 'select',
     text: 'Pieza dental 16',
+    image:'/img/questions/pregunta62.jpg',
     options: [
       'Sin Pieza',
       'Sano',
@@ -978,6 +993,7 @@ const questions = [
     id: 63,
     type: 'select',
     text: 'Pieza dental 17',
+    image:'/img/questions/pregunta63.jpg',
     options: [
       'Sin Pieza',
       'Sano',
@@ -997,6 +1013,7 @@ const questions = [
     id: 64,
     type: 'select',
     text: 'Pieza dental 18',
+    image:'/img/questions/pregunta64.jpg',
     options: [
       'Sin Pieza',
       'Sano',
@@ -1016,6 +1033,7 @@ const questions = [
     id: 65,
     type: 'select',
     text: 'Pieza dental 21',
+    image:'/img/questions/pregunta65.jpg',
     options: [
       'Sin Pieza',
       'Sano',
@@ -1035,6 +1053,7 @@ const questions = [
     id: 66,
     type: 'select',
     text: 'Pieza dental 22',
+    image:'/img/questions/pregunta66.jpg',
     options: [
       'Sin Pieza',
       'Sano',
@@ -1054,6 +1073,7 @@ const questions = [
     id: 67,
     type: 'select',
     text: 'Pieza dental 23',
+    image:'/img/questions/pregunta67.jpg',
     options: [
       'Sin Pieza',
       'Sano',
@@ -1073,6 +1093,7 @@ const questions = [
     id: 68,
     type: 'select',
     text: 'Pieza dental 24',
+    image:'/img/questions/pregunta68.jpg',
     options: [
       'Sin Pieza',
       'Sano',
@@ -1092,6 +1113,7 @@ const questions = [
     id: 69,
     type: 'select',
     text: 'Pieza dental 25',
+    image:'/img/questions/pregunta69.jpg',
     options: [
       'Sin Pieza',
       'Sano',
@@ -1111,6 +1133,7 @@ const questions = [
     id: 70,
     type: 'select',
     text: 'Pieza dental 26',
+    image:'/img/questions/pregunta70.jpg',
     options: [
       'Sin Pieza',
       'Sano',
@@ -1130,6 +1153,7 @@ const questions = [
     id: 71,
     type: 'select',
     text: 'Pieza dental 27',
+    image:'/img/questions/pregunta71.jpg',
     options: [
       'Sin Pieza',
       'Sano',
@@ -1149,6 +1173,7 @@ const questions = [
     id: 72,
     type: 'select',
     text: 'Pieza dental 28',
+    image:'/img/questions/pregunta72.jpg',
     options: [
       'Sin Pieza',
       'Sano',
@@ -1168,6 +1193,7 @@ const questions = [
     id: 73,
     type: 'select',
     text: 'Pieza dental 31',
+    image:'/img/questions/pregunta73.jpg',
     options: [
       'Sin Pieza',
       'Sano',
@@ -1187,6 +1213,7 @@ const questions = [
     id: 74,
     type: 'select',
     text: 'Pieza dental 32',
+    image:'/img/questions/pregunta74.jpg',
     options: [
       'Sin Pieza',
       'Sano',
@@ -1206,6 +1233,7 @@ const questions = [
     id: 75,
     type: 'select',
     text: 'Pieza dental 33',
+    image:'/img/questions/pregunta75.jpg',
     options: [
       'Sin Pieza',
       'Sano',
@@ -1225,6 +1253,7 @@ const questions = [
     id: 76,
     type: 'select',
     text: 'Pieza dental 34',
+    image:'/img/questions/pregunta76.jpg',
     options: [
       'Sin Pieza',
       'Sano',
@@ -1244,6 +1273,7 @@ const questions = [
     id: 77,
     type: 'select',
     text: 'Pieza dental 35',
+    image:'/img/questions/pregunta77.jpg',
     options: [
       'Sin Pieza',
       'Sano',
@@ -1263,6 +1293,7 @@ const questions = [
     id: 78,
     type: 'select',
     text: 'Pieza dental 36',
+    image:'/img/questions/pregunta78.jpg',
     options: [
       'Sin Pieza',
       'Sano',
@@ -1282,6 +1313,7 @@ const questions = [
     id: 79,
     type: 'select',
     text: 'Pieza dental 37',
+    image:'/img/questions/pregunta79.jpg',
     options: [
       'Sin Pieza',
       'Sano',
@@ -1301,6 +1333,7 @@ const questions = [
     id: 80,
     type: 'select',
     text: 'Pieza dental 38',
+    image:'/img/questions/pregunta80.jpg',
     options: [
       'Sin Pieza',
       'Sano',
@@ -1320,6 +1353,7 @@ const questions = [
     id: 81,
     type: 'select',
     text: 'Pieza dental 41',
+    image:'/img/questions/pregunta81.jpg',
     options: [
       'Sin Pieza',
       'Sano',
@@ -1339,6 +1373,7 @@ const questions = [
     id: 82,
     type: 'select',
     text: 'Pieza dental 42',
+    image:'/img/questions/pregunta82.jpg',
     options: [
       'Sin Pieza',
       'Sano',
@@ -1358,6 +1393,7 @@ const questions = [
     id: 83,
     type: 'select',
     text: 'Pieza dental 43',
+    image:'/img/questions/pregunta83.jpg',
     options: [
       'Sin Pieza',
       'Sano',
@@ -1377,6 +1413,7 @@ const questions = [
     id: 84,
     type: 'select',
     text: 'Pieza dental 44',
+    image:'/img/questions/pregunta84.jpg',
     options: [
       'Sin Pieza',
       'Sano',
@@ -1396,6 +1433,7 @@ const questions = [
     id: 85,
     type: 'select',
     text: 'Pieza dental 45',
+    image:'/img/questions/pregunta85.jpg',
     options: [
       'Sin Pieza',
       'Sano',
@@ -1415,6 +1453,7 @@ const questions = [
     id: 86,
     type: 'select',
     text: 'Pieza dental 46',
+    image:'/img/questions/pregunta86.jpg',
     options: [
       'Sin Pieza',
       'Sano',
@@ -1434,6 +1473,7 @@ const questions = [
     id: 87,
     type: 'select',
     text: 'Pieza dental 47',
+    image:'/img/questions/pregunta87.jpg',
     options: [
       'Sin Pieza',
       'Sano',
@@ -1453,6 +1493,7 @@ const questions = [
     id: 88,
     type: 'select',
     text: 'Pieza dental 48',
+    image:'/img/questions/pregunta88.jpg',
     options: [
       'Sin Pieza',
       'Sano',
