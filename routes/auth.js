@@ -15,18 +15,26 @@ router.post('/register', (req, res) => {
   const { name, email, password, passwordConfirm } = req.body;
 
   if (!name || !email || !password || !passwordConfirm) {
-    return res.render('register', { error: 'Todos los campos son obligatorios.' });
+    return res.render('register', {
+      error: 'Todos los campos son obligatorios.'
+    });
   }
 
   if (password !== passwordConfirm) {
-    return res.render('register', { error: 'Las contraseñas no coinciden.' });
+    return res.render('register', {
+      error: 'Las contraseñas no coinciden.'
+    });
   }
 
+  // El primer usuario será admin; los demás, user
   const countQuery = 'SELECT COUNT(*) AS total FROM users';
+
   db.get(countQuery, (countErr, row) => {
     if (countErr) {
       console.error(countErr);
-      return res.render('register', { error: 'Error al registrar. Intenta de nuevo.' });
+      return res.render('register', {
+        error: 'Error al registrar. Intenta de nuevo.'
+      });
     }
 
     const isFirstUser = row.total === 0;
@@ -35,7 +43,9 @@ router.post('/register', (req, res) => {
     bcrypt.hash(password, SALT_ROUNDS, (err, hash) => {
       if (err) {
         console.error(err);
-        return res.render('register', { error: 'Error al registrar. Intenta de nuevo.' });
+        return res.render('register', {
+          error: 'Error al registrar. Intenta de nuevo.'
+        });
       }
 
       const stmt = `
@@ -46,16 +56,20 @@ router.post('/register', (req, res) => {
       db.run(stmt, [name, email, hash, role], function (dbErr) {
         if (dbErr) {
           console.error(dbErr);
+
           let msg = 'Error al registrar.';
           if (dbErr.message.includes('UNIQUE')) {
             msg = 'Este correo ya está registrado.';
           }
+
           return res.render('register', { error: msg });
         }
 
+        // Guardar sesión
         req.session.userId = this.lastID;
         req.session.role = role;
 
+        // Redirigir según rol
         if (role === 'admin') {
           return res.redirect('/admin/dashboard');
         }
@@ -68,7 +82,11 @@ router.post('/register', (req, res) => {
 
 // GET /login
 router.get('/login', (req, res) => {
-  res.render('login', { error: null });
+  res.render('login', {
+    title: 'Iniciar Sesión',
+    error: null,
+    message: null
+  });
 });
 
 // POST /login
@@ -76,7 +94,11 @@ router.post('/login', (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.render('login', { error: 'Ingresa tu correo y contraseña.' });
+    return res.render('login', {
+      title: 'Iniciar Sesión',
+      error: 'Ingresa tu correo y contraseña.',
+      message: null
+    });
   }
 
   const query = `
@@ -88,26 +110,44 @@ router.post('/login', (req, res) => {
   db.get(query, [email], (err, user) => {
     if (err) {
       console.error(err);
-      return res.render('login', { error: 'Error interno. Intenta de nuevo.' });
+      return res.render('login', {
+        title: 'Iniciar Sesión',
+        error: 'Error interno. Intenta de nuevo.',
+        message: null
+      });
     }
 
     if (!user) {
-      return res.render('login', { error: 'Usuario o contraseña incorrectos.' });
+      return res.render('login', {
+        title: 'Iniciar Sesión',
+        error: 'Usuario o contraseña incorrectos.',
+        message: null
+      });
     }
 
     bcrypt.compare(password, user.password_hash, (compareErr, same) => {
       if (compareErr) {
         console.error(compareErr);
-        return res.render('login', { error: 'Error interno. Intenta de nuevo.' });
+        return res.render('login', {
+          title: 'Iniciar Sesión',
+          error: 'Error interno. Intenta de nuevo.',
+          message: null
+        });
       }
 
       if (!same) {
-        return res.render('login', { error: 'Usuario o contraseña incorrectos.' });
+        return res.render('login', {
+          title: 'Iniciar Sesión',
+          error: 'Usuario o contraseña incorrectos.',
+          message: null
+        });
       }
 
+      // Guardar sesión
       req.session.userId = user.id;
       req.session.role = user.role;
 
+      // Redirigir según rol
       if (user.role === 'admin') {
         return res.redirect('/admin/dashboard');
       }

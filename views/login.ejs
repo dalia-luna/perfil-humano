@@ -1,60 +1,122 @@
-router.post('/login', async (req, res) => {
-  const { email, password } = req.body;  // ← Cambiado: email en vez de username
-
-  console.log('Intento de login con email:', { email });
-
-  try {
-    // Buscar usuario SOLO por email (asumiendo que tu tabla tiene columna 'email')
-    const user = await new Promise((resolve, reject) => {
-      db.get(
-        'SELECT * FROM users WHERE email = ?',
-        [email],
-        (err, row) => {
-          if (err) reject(err);
-          resolve(row);
-        }
-      );
-    });
-
-    console.log('Usuario encontrado:', user ? 'SÍ' : 'NO');
-
-    if (!user) {
-      console.log('Usuario no encontrado');
-      return res.render('login', {
-        title: 'Iniciar Sesión',
-        error: 'Correo o contraseña incorrectos'
-      });
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title || 'Iniciar Sesión' %></title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
     }
 
-    // Comparar contraseña
-    const match = await bcrypt.compare(password, user.password);
-    console.log('Contraseña coincide:', match);
-
-    if (!match) {
-      console.log('Contraseña incorrecta');
-      return res.render('login', {
-        title: 'Iniciar Sesión',
-        error: 'Correo o contraseña incorrectos'
-      });
+    .container {
+      background: #fff;
+      padding: 32px;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      width: 100%;
+      max-width: 420px;
     }
 
-    // Guardar sesión
-    req.session.user = {
-      id: user.id,
-      email: user.email,
-      // Agrega otros campos si necesitas: username: user.username || email, etc.
-    };
+    h1 {
+      text-align: center;
+      margin-bottom: 24px;
+    }
 
-    console.log('Sesión guardada para:', user.email);
+    .message {
+      margin-bottom: 16px;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+    }
 
-    // Redirigir después de login exitoso
-    res.redirect('/questionnaire');  // Cambia a donde quieras ir después
+    .error {
+      background: #fdecea;
+      color: #b42318;
+    }
 
-  } catch (err) {
-    console.error('Error en login:', err);
-    res.render('login', {
-      title: 'Iniciar Sesión',
-      error: 'Error interno. Intenta más tarde.'
-    });
-  }
-});
+    .success {
+      background: #ecfdf3;
+      color: #067647;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 16px;
+      border: 1px solid #d0d5dd;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    .links {
+      margin-top: 16px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .links a {
+      color: #2563eb;
+      text-decoration: none;
+    }
+
+    .links a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Iniciar Sesión</h1>
+
+    <% if (error) { %>
+      <div class="message error"><%= error %></div>
+    <% } %>
+
+    <% if (message) { %>
+      <div class="message success"><%= message %></div>
+    <% } %>
+
+    <form action="/login" method="POST">
+      <label for="email">Correo electrónico</label>
+      <input type="email" id="email" name="email" required />
+
+      <label for="password">Contraseña</label>
+      <input type="password" id="password" name="password" required />
+
+      <button type="submit">Entrar</button>
+    </form>
+
+    <div class="links">
+      <p>¿No tienes cuenta? <a href="/register">Regístrate aquí</a></p>
+    </div>
+  </div>
+</body>
+</html>
