@@ -3,25 +3,28 @@ const path = require('path');
 const fs = require('fs');
 
 const localDbPath = path.join(__dirname, 'database.sqlite');
-const configuredDbPath = process.env.DB_PATH;
+const dbPath = process.env.DB_PATH || localDbPath;
 
-// En producción, obliga a usar la base persistente
-if (process.env.NODE_ENV === 'production' && !configuredDbPath) {
-  console.error('ERROR: Falta DB_PATH en producción.');
-  process.exit(1);
-}
-
-const dbPath = configuredDbPath || localDbPath;
-
-// Crear directorio destino si no existe
+// Crear directorio del destino si no existe
 const dbDir = path.dirname(dbPath);
 if (!fs.existsSync(dbDir)) {
   fs.mkdirSync(dbDir, { recursive: true });
 }
 
+// Si estamos usando un volumen y aún no existe la base del volumen,
+// copiar una sola vez la base local del proyecto al volumen.
+if (dbPath !== localDbPath && !fs.existsSync(dbPath) && fs.existsSync(localDbPath)) {
+  try {
+    fs.copyFileSync(localDbPath, dbPath);
+    console.log(`Base inicial copiada al volumen: ${localDbPath} -> ${dbPath}`);
+  } catch (err) {
+    console.error('No se pudo copiar la base inicial al volumen:', err.message);
+  }
+}
+
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
-    console.error('Error al abrir la base de datos principal:', err.message);
+    console.error('Error al abrir la base de datos:', err.message);
     return;
   }
 
@@ -67,148 +70,5 @@ db.serialize(() => {
     ON answers(user_id, question_number)
   `);
 });
-
-// Si estamos usando volumen y existe una base vieja local, migrar/mezclar datos
-if (dbPath !== localDbPath && fs.existsSync(localDbPath)) {
-  migrateLegacyDatabase();
-}
-
-function migrateLegacyDatabase() {
-  const legacyDb = new sqlite3.Database(localDbPath, sqlite3.OPEN_READONLY, (err) => {
-    if (err) {
-      console.error('No se pudo abrir la base local antigua:', err.message);
-      return;
-    }
-
-    console.log('Base local antigua detectada, iniciando migración...');
-  });
-
-  // Verifica que la base antigua tenga tabla users
-  legacyDb.get(
-    `SELECT name FROM sqlite_master WHERE type='table' AND name='users'`,
-    (checkErr, row) => {
-      if (checkErr || !row) {
-        if (checkErr) console.error('Error verificando base antigua:', checkErr.message);
-        legacyDb.close();
-        return;
-      }
-
-      legacyDb.all(
-        `SELECT id, name, email, password_hash, role, created_at FROM users ORDER BY id ASC`,
-        (usersErr, legacyUsers) => {
-          if (usersErr) {
-            console.error('Error leyendo usuarios antiguos:', usersErr.message);
-            legacyDb.close();
-            return;
-          }
-
-          const userIdMap = {};
-          migrateUsersSequentially(legacyUsers, 0, userIdMap, legacyDb);
-        }
-      );
-    }
-  );
-}
-
-function migrateUsersSequentially(legacyUsers, index, userIdMap, legacyDb) {
-  if (index >= legacyUsers.length) {
-    return migrateAnswers(userIdMap, legacyDb);
-  }
-
-  const legacyUser = legacyUsers[index];
-
-  db.get(
-    `SELECT id FROM users WHERE email = ?`,
-    [legacyUser.email],
-    (findErr, existingUser) => {
-      if (findErr) {
-        console.error('Error buscando usuario existente:', findErr.message);
-        return migrateUsersSequentially(legacyUsers, index + 1, userIdMap, legacyDb);
-      }
-
-      if (existingUser) {
-        userIdMap[legacyUser.id] = existingUser.id;
-        return migrateUsersSequentially(legacyUsers, index + 1, userIdMap, legacyDb);
-      }
-
-      db.run(
-        `
-          INSERT INTO users (name, email, password_hash, role, created_at)
-          VALUES (?, ?, ?, ?, ?)
-        `,
-        [
-          legacyUser.name,
-          legacyUser.email,
-          legacyUser.password_hash,
-          legacyUser.role || 'user',
-          legacyUser.created_at || null
-        ],
-        function (insertErr) {
-          if (insertErr) {
-            console.error('Error insertando usuario migrado:', insertErr.message);
-          } else {
-            userIdMap[legacyUser.id] = this.lastID;
-          }
-
-          migrateUsersSequentially(legacyUsers, index + 1, userIdMap, legacyDb);
-        }
-      );
-    }
-  );
-}
-
-function migrateAnswers(userIdMap, legacyDb) {
-  legacyDb.all(
-    `SELECT user_id, question_number, answer_text, updated_at FROM answers ORDER BY user_id, question_number`,
-    (answersErr, legacyAnswers) => {
-      if (answersErr) {
-        console.error('Error leyendo respuestas antiguas:', answersErr.message);
-        legacyDb.close();
-        return;
-      }
-
-      migrateAnswersSequentially(legacyAnswers, 0, userIdMap, legacyDb);
-    }
-  );
-}
-
-function migrateAnswersSequentially(legacyAnswers, index, userIdMap, legacyDb) {
-  if (index >= legacyAnswers.length) {
-    console.log('Migración de usuarios y respuestas completada.');
-    legacyDb.close();
-    return;
-  }
-
-  const legacyAnswer = legacyAnswers[index];
-  const newUserId = userIdMap[legacyAnswer.user_id];
-
-  if (!newUserId) {
-    return migrateAnswersSequentially(legacyAnswers, index + 1, userIdMap, legacyDb);
-  }
-
-  db.run(
-    `
-      INSERT INTO answers (user_id, question_number, answer_text, updated_at)
-      VALUES (?, ?, ?, ?)
-      ON CONFLICT(user_id, question_number)
-      DO UPDATE SET
-        answer_text = excluded.answer_text,
-        updated_at = excluded.updated_at
-    `,
-    [
-      newUserId,
-      legacyAnswer.question_number,
-      legacyAnswer.answer_text,
-      legacyAnswer.updated_at || null
-    ],
-    (insertErr) => {
-      if (insertErr) {
-        console.error('Error migrando respuesta:', insertErr.message);
-      }
-
-      migrateAnswersSequentially(legacyAnswers, index + 1, userIdMap, legacyDb);
-    }
-  );
-}
 
 module.exports = db;
