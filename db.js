@@ -5,14 +5,14 @@ const fs = require('fs');
 const localDbPath = path.join(__dirname, 'database.sqlite');
 const dbPath = process.env.DB_PATH || localDbPath;
 
-// Crear directorio del destino si no existe
+// Crear directorio si no existe
 const dbDir = path.dirname(dbPath);
 if (!fs.existsSync(dbDir)) {
   fs.mkdirSync(dbDir, { recursive: true });
 }
 
-// Si estamos usando un volumen y aún no existe la base del volumen,
-// copiar una sola vez la base local del proyecto al volumen.
+// Si estamos usando volumen y aún no existe la base del volumen,
+// copiamos una sola vez la base local al volumen.
 if (dbPath !== localDbPath && !fs.existsSync(dbPath) && fs.existsSync(localDbPath)) {
   try {
     fs.copyFileSync(localDbPath, dbPath);
