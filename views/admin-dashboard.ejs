@@ -1,61 +1,375 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Dashboard Admin - Perfil Humano Digital</title>
-  <link rel="stylesheet" href="/css/styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel de administración · Perfil Humano Digital</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: #eef3f8;
+      color: #0f172a;
+      padding: 24px;
+    }
+
+    .topbar {
+      max-width: 1200px;
+      margin: 0 auto 20px auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .topbar h1 {
+      margin: 0;
+      font-size: 2rem;
+    }
+
+    .topbar-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn,
+    .btn-secondary,
+    .btn-danger {
+      display: inline-block;
+      padding: 12px 18px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn {
+      background: #2563eb;
+      color: white;
+    }
+
+    .btn-secondary {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    .btn-danger {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      gap: 20px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 22px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+      border: 1px solid #e5e7eb;
+    }
+
+    .stat-label {
+      color: #64748b;
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: bold;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar h2 {
+      margin: 0;
+      font-size: 1.35rem;
+    }
+
+    .search-box input {
+      width: 320px;
+      max-width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      font-size: 1rem;
+      outline: none;
+      background: #fff;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+      border: 1px solid #e5e7eb;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 980px;
+    }
+
+    thead {
+      background: #f8fafc;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 16px 14px;
+      border-bottom: 1px solid #e5e7eb;
+      vertical-align: middle;
+    }
+
+    th {
+      font-size: 0.9rem;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    tr:hover {
+      background: #fafcff;
+    }
+
+    .user-name {
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .user-email {
+      color: #64748b;
+      font-size: 0.92rem;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: bold;
+    }
+
+    .pill-admin {
+      background: #ede9fe;
+      color: #6d28d9;
+    }
+
+    .pill-user {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .pill-complete {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .pill-progress {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .progress-cell {
+      min-width: 240px;
+    }
+
+    .progress-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+      font-size: 0.92rem;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 12px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #2563eb, #22c55e);
+    }
+
+    .muted {
+      color: #64748b;
+      font-size: 0.95rem;
+    }
+
+    .empty {
+      padding: 28px;
+      text-align: center;
+      color: #64748b;
+    }
+  </style>
 </head>
-<body class="page-admin">
-  <div class="container">
-    <header class="top-bar">
-      <div><strong>Panel de administración</strong> · Perfil Humano Digital</div>
-      <nav>
-        <a href="/admin/export/excel" class="primary-button" style="margin-right: 8px;">
-          Exportar Excel
-        </a>
-        <a href="/admin/export/pdf" class="primary-button">
-          Exportar PDF
-        </a>
-        <form action="/logout" method="GET" style="display:inline; margin-left: 12px;">
-          <button type="submit" class="link-button">Cerrar sesión</button>
-        </form>
-      </nav>
-    </header>
+<body>
+  <%
+    const totalUsers = users.length;
+    const completedUsers = users.filter(u => u.completed).length;
+    const inProgressUsers = totalUsers - completedUsers;
+    const avgCompletion = totalUsers
+      ? Math.round(users.reduce((acc, u) => acc + u.completion, 0) / totalUsers)
+      : 0;
+  %>
 
-    <h1>Perfiles respondidos</h1>
-    <p>
-      Total de preguntas por perfil: <strong><%= totalQuestions %></strong>
-    </p>
+  <div class="topbar">
+    <h1>Panel de administración</h1>
 
-    <table class="admin-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nombre</th>
-          <th>Correo</th>
-          <th>Rol</th>
-          <th>Preguntas respondidas</th>
-          <th>Avance</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% users.forEach(function(user) { %>
-          <tr>
-            <td><%= user.id %></td>
-            <td><%= user.name %></td>
-            <td><%= user.email %></td>
-            <td><%= user.role %></td>
-            <td><%= user.answered %></td>
-            <td>
-              <%= user.completion %>% 
-              <% if (user.completed) { %>
-                <span class="badge-completed">Completado</span>
-              <% } %>
-            </td>
-          </tr>
-        <% }) %>
-      </tbody>
-    </table>
+    <div class="topbar-actions">
+      <a class="btn" href="/admin/export/excel">Exportar Excel</a>
+      <a class="btn-secondary" href="/admin/export/pdf">Exportar PDF</a>
+      <a class="btn-danger" href="/logout">Cerrar sesión</a>
+    </div>
   </div>
+
+  <div class="container">
+    <div class="stats">
+      <div class="card">
+        <div class="stat-label">Usuarios registrados</div>
+        <div class="stat-value"><%= totalUsers %></div>
+      </div>
+
+      <div class="card">
+        <div class="stat-label">Perfiles completados</div>
+        <div class="stat-value"><%= completedUsers %></div>
+      </div>
+
+      <div class="card">
+        <div class="stat-label">En progreso</div>
+        <div class="stat-value"><%= inProgressUsers %></div>
+      </div>
+
+      <div class="card">
+        <div class="stat-label">Avance promedio</div>
+        <div class="stat-value"><%= avgCompletion %>%</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="toolbar">
+        <div>
+          <h2>Usuarios y progreso</h2>
+          <div class="muted">Total de preguntas por perfil: <%= totalQuestions %></div>
+        </div>
+
+        <div class="search-box">
+          <input
+            type="text"
+            id="userSearch"
+            placeholder="Buscar por nombre, correo o rol..."
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <% if (!users.length) { %>
+        <div class="empty">Aún no hay usuarios registrados.</div>
+      <% } else { %>
+        <table id="usersTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Usuario</th>
+              <th>Rol</th>
+              <th>Respondidas</th>
+              <th>Avance</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% users.forEach(function(user) { %>
+              <tr>
+                <td><strong>#<%= user.id %></strong></td>
+
+                <td>
+                  <div class="user-name"><%= user.name %></div>
+                  <div class="user-email"><%= user.email %></div>
+                </td>
+
+                <td>
+                  <span class="pill <%= user.role === 'admin' ? 'pill-admin' : 'pill-user' %>">
+                    <%= user.role %>
+                  </span>
+                </td>
+
+                <td>
+                  <strong><%= user.answered %></strong>
+                  <span class="muted"> / <%= totalQuestions %></span>
+                </td>
+
+                <td class="progress-cell">
+                  <div class="progress-top">
+                    <span><%= user.completion %>%</span>
+                    <span class="muted"><%= user.answered %> respuestas</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width: <%= user.completion %>%"></div>
+                  </div>
+                </td>
+
+                <td>
+                  <% if (user.completed) { %>
+                    <span class="pill pill-complete">Completado</span>
+                  <% } else { %>
+                    <span class="pill pill-progress">En progreso</span>
+                  <% } %>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      <% } %>
+    </div>
+  </div>
+
+  <script>
+    const searchInput = document.getElementById('userSearch');
+    const table = document.getElementById('usersTable');
+
+    if (searchInput && table) {
+      const rows = Array.from(table.querySelectorAll('tbody tr'));
+
+      searchInput.addEventListener('input', function () {
+        const term = this.value.toLowerCase().trim();
+
+        rows.forEach((row) => {
+          const text = row.innerText.toLowerCase();
+          row.style.display = text.includes(term) ? '' : 'none';
+        });
+      });
+    }
+  </script>
 </body>
 </html>
