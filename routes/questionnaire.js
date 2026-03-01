@@ -18,28 +18,59 @@ function requireUser(req, res, next) {
   next();
 }
 
+// Obtiene progreso real del usuario
+function getUserProgress(userId, callback) {
+  const sql = `
+    SELECT question_number
+    FROM answers
+    WHERE user_id = ?
+    ORDER BY question_number ASC
+  `;
+
+  db.all(sql, [userId], (err, rows) => {
+    if (err) return callback(err);
+
+    const answeredNumbers = rows
+      .map((r) => Number(r.question_number))
+      .filter((n) => !isNaN(n));
+
+    const answeredSet = new Set(answeredNumbers);
+    const answeredCount = answeredSet.size;
+
+    let firstMissingQuestion = null;
+    for (let i = 1; i <= TOTAL_QUESTIONS; i++) {
+      if (!answeredSet.has(i)) {
+        firstMissingQuestion = i;
+        break;
+      }
+    }
+
+    const completed = answeredCount >= TOTAL_QUESTIONS;
+
+    callback(null, {
+      answeredCount,
+      firstMissingQuestion,
+      completed
+    });
+  });
+}
+
 // GET /questionnaire/instructions
 router.get('/instructions', requireUser, (req, res) => {
   const userId = req.session.userId;
 
-  const query = `
-    SELECT MAX(question_number) AS last_question
-    FROM answers
-    WHERE user_id = ?
-  `;
-
-  db.get(query, [userId], (err, row) => {
+  getUserProgress(userId, (err, progress) => {
     if (err) {
       console.error(err);
       return res.sendStatus(500);
     }
 
-    const lastQuestion = row && row.last_question ? row.last_question : 0;
+    const lastQuestion = progress.answeredCount;
 
     let buttonLabel;
-    if (lastQuestion === 0) {
+    if (progress.answeredCount === 0) {
       buttonLabel = 'Iniciar';
-    } else if (lastQuestion < TOTAL_QUESTIONS) {
+    } else if (!progress.completed) {
       buttonLabel = 'Continuar';
     } else {
       buttonLabel = 'Editar respuestas';
@@ -47,7 +78,7 @@ router.get('/instructions', requireUser, (req, res) => {
 
     res.render('instructions', {
       lastQuestion,
-      nextQuestion: lastQuestion + 1,
+      nextQuestion: progress.firstMissingQuestion || TOTAL_QUESTIONS,
       buttonLabel,
       totalQuestions: TOTAL_QUESTIONS
     });
@@ -58,29 +89,17 @@ router.get('/instructions', requireUser, (req, res) => {
 router.post('/instructions/start', requireUser, (req, res) => {
   const userId = req.session.userId;
 
-  const query = `
-    SELECT MAX(question_number) AS last_question
-    FROM answers
-    WHERE user_id = ?
-  `;
-
-  db.get(query, [userId], (err, row) => {
+  getUserProgress(userId, (err, progress) => {
     if (err) {
       console.error(err);
       return res.sendStatus(500);
     }
 
-    const lastQuestion = row && row.last_question ? row.last_question : 0;
-
-    if (lastQuestion >= TOTAL_QUESTIONS) {
+    if (progress.completed) {
       return res.redirect('/questionnaire/edit-answers');
     }
 
-    if (lastQuestion === 0) {
-      return res.redirect('/questionnaire/question/1');
-    }
-
-    const nextQuestion = lastQuestion + 1;
+    const nextQuestion = progress.firstMissingQuestion || 1;
     return res.redirect(`/questionnaire/question/${nextQuestion}`);
   });
 });
@@ -89,21 +108,13 @@ router.post('/instructions/start', requireUser, (req, res) => {
 router.get('/edit-answers', requireUser, (req, res) => {
   const userId = req.session.userId;
 
-  const progressQuery = `
-    SELECT MAX(question_number) AS last_question
-    FROM answers
-    WHERE user_id = ?
-  `;
-
-  db.get(progressQuery, [userId], (err, row) => {
+  getUserProgress(userId, (err, progress) => {
     if (err) {
       console.error(err);
       return res.sendStatus(500);
     }
 
-    const lastQuestion = row && row.last_question ? row.last_question : 0;
-
-    if (lastQuestion < TOTAL_QUESTIONS) {
+    if (!progress.completed) {
       return res.redirect('/questionnaire/instructions');
     }
 
@@ -144,6 +155,10 @@ router.get('/question/:number', requireUser, (req, res) => {
   }
 
   const question = questions[number - 1];
+  if (!question) {
+    return res.redirect('/questionnaire/instructions');
+  }
+
   const progressPercent = ((number - 1) / TOTAL_QUESTIONS) * 100;
 
   const query = `
@@ -192,7 +207,7 @@ router.post('/question/:number', requireUser, (req, res) => {
 
   db.run(stmt, [userId, number, answer], function (err) {
     if (err) {
-      console.error(err);
+      console.error('Error guardando respuesta:', err);
       return res.sendStatus(500);
     }
 
@@ -200,13 +215,19 @@ router.post('/question/:number', requireUser, (req, res) => {
       return res.redirect('/questionnaire/edit-answers');
     }
 
-    const next = number + 1;
+    getUserProgress(userId, (progressErr, progress) => {
+      if (progressErr) {
+        console.error(progressErr);
+        return res.sendStatus(500);
+      }
 
-    if (next > TOTAL_QUESTIONS) {
-      return res.redirect('/questionnaire/instructions');
-    }
+      if (progress.completed) {
+        return res.redirect('/questionnaire/instructions');
+      }
 
-    return res.redirect(`/questionnaire/question/${next}`);
+      const nextQuestion = progress.firstMissingQuestion || number + 1;
+      return res.redirect(`/questionnaire/question/${nextQuestion}`);
+    });
   });
 });
 
