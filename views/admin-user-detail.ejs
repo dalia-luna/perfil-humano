@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Detalle de usuario · Perfil Humano Digital</title>
+  <style>
+    * { box-sizing: border-box; font-family: Arial, sans-serif; }
+    body { margin: 0; background: #eef3f8; color: #0f172a; padding: 24px; }
+
+    .topbar, .container { max-width: 1200px; margin: 0 auto; }
+    .topbar {
+      margin-bottom: 20px; display: flex; justify-content: space-between;
+      align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+
+    .btn, .btn-secondary {
+      display: inline-block; padding: 10px 16px; border-radius: 999px;
+      text-decoration: none; font-weight: bold;
+    }
+    .btn { background: #2563eb; color: white; }
+    .btn-secondary { background: #e2e8f0; color: #0f172a; }
+
+    .container { display: grid; gap: 20px; }
+
+    .card {
+      background: white; border-radius: 20px; padding: 24px;
+      box-shadow: 0 8px 24px rgba(15,23,42,.06); border: 1px solid #e5e7eb;
+    }
+
+    .header-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;
+    }
+
+    .label { color: #64748b; font-size: .92rem; margin-bottom: 6px; }
+    .value { font-weight: bold; font-size: 1.05rem; }
+    .muted { color: #64748b; }
+
+    .progress-bar {
+      width: 100%; height: 14px; background: #e5e7eb;
+      border-radius: 999px; overflow: hidden; margin-top: 10px;
+    }
+    .progress-fill {
+      height: 100%; background: linear-gradient(90deg, #2563eb, #22c55e);
+      border-radius: 999px;
+    }
+
+    .question-card {
+      border: 1px solid #e5e7eb; border-radius: 16px;
+      padding: 18px; background: #f8fafc; margin-bottom: 14px;
+    }
+
+    .question-top {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 12px; flex-wrap: wrap; margin-bottom: 10px;
+    }
+
+    .pill {
+      display: inline-block; padding: 6px 10px; border-radius: 999px;
+      font-size: .82rem; font-weight: bold;
+    }
+    .pill-ok { background: #dcfce7; color: #166534; }
+    .pill-empty { background: #e2e8f0; color: #475569; }
+
+    .question-text { font-weight: bold; line-height: 1.5; margin-bottom: 12px; }
+    .answer-box {
+      background: #fff; border: 1px solid #dbe3ea; border-radius: 12px;
+      padding: 12px; line-height: 1.5;
+    }
+    .question-image { margin-top: 12px; }
+    .question-image img {
+      max-width: 220px; border-radius: 12px; border: 1px solid #dbe3ea; background: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <h1>Detalle de usuario</h1>
+    <div>
+      <a class="btn-secondary" href="/admin/dashboard">Volver al panel</a>
+      <a class="btn" href="/logout">Cerrar sesión</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="card">
+      <h2><%= user.name %></h2>
+      <p class="muted"><%= user.email %></p>
+
+      <div class="header-grid">
+        <div>
+          <div class="label">ID</div>
+          <div class="value">#<%= user.id %></div>
+        </div>
+        <div>
+          <div class="label">Rol</div>
+          <div class="value"><%= user.role %></div>
+        </div>
+        <div>
+          <div class="label">Fecha de registro</div>
+          <div class="value"><%= user.createdAtFormatted %></div>
+        </div>
+        <div>
+          <div class="label">Última actividad</div>
+          <div class="value"><%= user.lastActivityFormatted %></div>
+        </div>
+        <div>
+          <div class="label">Respuestas</div>
+          <div class="value"><%= user.answered %> / <%= totalQuestions %></div>
+        </div>
+        <div>
+          <div class="label">Avance</div>
+          <div class="value"><%= user.completion %>%</div>
+        </div>
+      </div>
+
+      <div class="progress-bar">
+        <div class="progress-fill" style="width: <%= user.completion %>%"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Respuestas del cuestionario</h2>
+
+      <% detailedQuestions.forEach(function(item) { %>
+        <div class="question-card">
+          <div class="question-top">
+            <strong>Pregunta <%= item.number %></strong>
+            <% if (item.hasAnswer) { %>
+              <span class="pill pill-ok">Contestada</span>
+            <% } else { %>
+              <span class="pill pill-empty">Sin respuesta</span>
+            <% } %>
+          </div>
+
+          <div class="question-text"><%= item.text %></div>
+
+          <div class="answer-box">
+            <strong>Respuesta:</strong><br />
+            <%= item.answer || 'Sin respuesta registrada' %>
+            <br /><br />
+            <span class="muted">Última actualización: <%= item.updatedAtFormatted %></span>
+          </div>
+
+          <% if (item.image) { %>
+            <div class="question-image">
+              <img src="<%= item.image %>" alt="Imagen de apoyo" />
+            </div>
+          <% } %>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+</body>
+</html>

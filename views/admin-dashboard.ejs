@@ -5,270 +5,94 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Panel de administración · Perfil Humano Digital</title>
   <style>
-    * {
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
-    }
+    * { box-sizing: border-box; font-family: Arial, sans-serif; }
+    body { margin: 0; background: #eef3f8; color: #0f172a; padding: 24px; }
 
-    body {
-      margin: 0;
-      background: #eef3f8;
-      color: #0f172a;
-      padding: 24px;
-    }
-
+    .topbar, .container { max-width: 1300px; margin: 0 auto; }
     .topbar {
-      max-width: 1300px;
-      margin: 0 auto 20px auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
+      margin-bottom: 20px; display: flex; justify-content: space-between;
+      align-items: center; gap: 12px; flex-wrap: wrap;
     }
+    .topbar h1 { margin: 0; font-size: 2rem; }
+    .topbar-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 
-    .topbar h1 {
-      margin: 0;
-      font-size: 2rem;
+    .btn, .btn-secondary, .btn-danger, .filter-link, .action-link {
+      display: inline-block; padding: 10px 16px; border-radius: 999px;
+      text-decoration: none; font-weight: bold;
     }
+    .btn { background: #2563eb; color: white; }
+    .btn-secondary { background: #e2e8f0; color: #0f172a; }
+    .btn-danger { background: #fee2e2; color: #991b1b; }
+    .filter-link { background: #e2e8f0; color: #334155; font-size: .95rem; }
+    .filter-link.active { background: #2563eb; color: white; }
+    .action-link { background: #dbeafe; color: #1d4ed8; font-size: .9rem; }
 
-    .topbar-actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .btn,
-    .btn-secondary,
-    .btn-danger,
-    .filter-link {
-      display: inline-block;
-      padding: 12px 18px;
-      border-radius: 999px;
-      text-decoration: none;
-      font-weight: bold;
-      border: none;
-      cursor: pointer;
-    }
-
-    .btn {
-      background: #2563eb;
-      color: white;
-    }
-
-    .btn-secondary {
-      background: #e2e8f0;
-      color: #0f172a;
-    }
-
-    .btn-danger {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-
-    .filter-link {
-      background: #e2e8f0;
-      color: #334155;
-      padding: 10px 14px;
-      font-size: 0.95rem;
-    }
-
-    .filter-link.active {
-      background: #2563eb;
-      color: white;
-    }
-
-    .container {
-      max-width: 1300px;
-      margin: 0 auto;
-      display: grid;
-      gap: 20px;
-    }
-
+    .container { display: grid; gap: 20px; }
     .stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;
     }
+    .card, .table-wrap {
+      background: white; border-radius: 20px; padding: 22px;
+      box-shadow: 0 8px 24px rgba(15,23,42,.06); border: 1px solid #e5e7eb;
+    }
+    .table-wrap { overflow-x: auto; padding: 0; }
 
-    .card {
-      background: white;
-      border-radius: 20px;
-      padding: 22px;
-      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
-      border: 1px solid #e5e7eb;
-    }
-
-    .stat-label {
-      color: #64748b;
-      font-size: 0.95rem;
-      margin-bottom: 8px;
-    }
-
-    .stat-value {
-      font-size: 2rem;
-      font-weight: bold;
-    }
+    .stat-label { color: #64748b; font-size: .95rem; margin-bottom: 8px; }
+    .stat-value { font-size: 2rem; font-weight: bold; }
 
     .toolbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 12px; flex-wrap: wrap;
     }
-
-    .toolbar h2 {
-      margin: 0;
-      font-size: 1.35rem;
-    }
-
-    .toolbar-block {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      flex: 1;
-      min-width: 280px;
-    }
-
-    .filters {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
+    .toolbar h2 { margin: 0; font-size: 1.35rem; }
+    .toolbar-block { display: flex; flex-direction: column; gap: 10px; flex: 1; min-width: 280px; }
+    .filters { display: flex; gap: 10px; flex-wrap: wrap; }
 
     .search-box input {
-      width: 340px;
-      max-width: 100%;
-      padding: 12px 14px;
-      border: 1px solid #cbd5e1;
-      border-radius: 12px;
-      font-size: 1rem;
-      outline: none;
-      background: #fff;
+      width: 340px; max-width: 100%; padding: 12px 14px;
+      border: 1px solid #cbd5e1; border-radius: 12px; font-size: 1rem;
+      outline: none; background: #fff;
     }
 
-    .table-wrap {
-      overflow-x: auto;
-      background: white;
-      border-radius: 20px;
-      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
-      border: 1px solid #e5e7eb;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 1200px;
-    }
-
-    thead {
-      background: #f8fafc;
-    }
-
+    table { width: 100%; border-collapse: collapse; min-width: 1320px; }
+    thead { background: #f8fafc; }
     th, td {
-      text-align: left;
-      padding: 16px 14px;
-      border-bottom: 1px solid #e5e7eb;
-      vertical-align: middle;
+      text-align: left; padding: 16px 14px; border-bottom: 1px solid #e5e7eb; vertical-align: middle;
     }
-
     th {
-      font-size: 0.9rem;
-      color: #475569;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
+      font-size: .9rem; color: #475569; text-transform: uppercase; letter-spacing: .03em;
     }
+    tr:hover { background: #fafcff; }
 
-    tr:hover {
-      background: #fafcff;
-    }
-
-    .user-name {
-      font-weight: bold;
-      margin-bottom: 4px;
-    }
-
-    .user-email {
-      color: #64748b;
-      font-size: 0.92rem;
-    }
+    .user-name { font-weight: bold; margin-bottom: 4px; }
+    .user-email, .muted { color: #64748b; font-size: .92rem; }
+    .small-text { font-size: .9rem; color: #475569; line-height: 1.4; }
 
     .pill {
-      display: inline-block;
-      padding: 6px 10px;
-      border-radius: 999px;
-      font-size: 0.82rem;
-      font-weight: bold;
+      display: inline-block; padding: 6px 10px; border-radius: 999px;
+      font-size: .82rem; font-weight: bold;
     }
+    .pill-admin { background: #ede9fe; color: #6d28d9; }
+    .pill-user { background: #dbeafe; color: #1d4ed8; }
+    .pill-complete { background: #dcfce7; color: #166534; }
+    .pill-progress { background: #fef3c7; color: #92400e; }
+    .pill-not-started { background: #e2e8f0; color: #475569; }
 
-    .pill-admin {
-      background: #ede9fe;
-      color: #6d28d9;
-    }
-
-    .pill-user {
-      background: #dbeafe;
-      color: #1d4ed8;
-    }
-
-    .pill-complete {
-      background: #dcfce7;
-      color: #166534;
-    }
-
-    .pill-progress {
-      background: #fef3c7;
-      color: #92400e;
-    }
-
-    .pill-not-started {
-      background: #e2e8f0;
-      color: #475569;
-    }
-
-    .progress-cell {
-      min-width: 240px;
-    }
-
+    .progress-cell { min-width: 240px; }
     .progress-top {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 8px;
-      font-size: 0.92rem;
+      display: flex; justify-content: space-between; gap: 10px;
+      margin-bottom: 8px; font-size: .92rem;
     }
-
     .progress-bar {
-      width: 100%;
-      height: 12px;
-      background: #e5e7eb;
-      border-radius: 999px;
-      overflow: hidden;
+      width: 100%; height: 12px; background: #e5e7eb;
+      border-radius: 999px; overflow: hidden;
     }
-
     .progress-fill {
-      height: 100%;
-      border-radius: 999px;
+      height: 100%; border-radius: 999px;
       background: linear-gradient(90deg, #2563eb, #22c55e);
     }
 
-    .muted {
-      color: #64748b;
-      font-size: 0.95rem;
-    }
-
-    .small-text {
-      font-size: 0.9rem;
-      color: #475569;
-      line-height: 1.4;
-    }
-
-    .empty {
-      padding: 28px;
-      text-align: center;
-      color: #64748b;
-    }
+    .empty { padding: 28px; text-align: center; color: #64748b; }
   </style>
 </head>
 <body>
@@ -284,7 +108,6 @@
 
   <div class="topbar">
     <h1>Panel de administración</h1>
-
     <div class="topbar-actions">
       <a class="btn" href="/admin/export/excel">Exportar Excel</a>
       <a class="btn-secondary" href="/admin/export/pdf">Exportar PDF</a>
@@ -298,22 +121,18 @@
         <div class="stat-label">Usuarios visibles</div>
         <div class="stat-value"><%= totalUsers %></div>
       </div>
-
       <div class="card">
         <div class="stat-label">Completados</div>
         <div class="stat-value"><%= completedUsers %></div>
       </div>
-
       <div class="card">
         <div class="stat-label">En progreso</div>
         <div class="stat-value"><%= inProgressUsers %></div>
       </div>
-
       <div class="card">
         <div class="stat-label">Sin iniciar</div>
         <div class="stat-value"><%= notStartedUsers %></div>
       </div>
-
       <div class="card">
         <div class="stat-label">Avance promedio</div>
         <div class="stat-value"><%= avgCompletion %>%</div>
@@ -337,11 +156,7 @@
         </div>
 
         <div class="search-box">
-          <input
-            type="text"
-            id="userSearch"
-            placeholder="Buscar por nombre, correo, rol o estado..."
-          />
+          <input type="text" id="userSearch" placeholder="Buscar por nombre, correo, rol o estado..." />
         </div>
       </div>
     </div>
@@ -361,37 +176,28 @@
               <th>Respondidas</th>
               <th>Avance</th>
               <th>Estado</th>
+              <th>Detalle</th>
             </tr>
           </thead>
           <tbody>
             <% users.forEach(function(user) { %>
               <tr>
                 <td><strong>#<%= user.id %></strong></td>
-
                 <td>
                   <div class="user-name"><%= user.name %></div>
                   <div class="user-email"><%= user.email %></div>
                 </td>
-
                 <td>
                   <span class="pill <%= user.role === 'admin' ? 'pill-admin' : 'pill-user' %>">
                     <%= user.role %>
                   </span>
                 </td>
-
-                <td>
-                  <div class="small-text"><%= user.createdAtFormatted %></div>
-                </td>
-
-                <td>
-                  <div class="small-text"><%= user.lastActivityFormatted %></div>
-                </td>
-
+                <td><div class="small-text"><%= user.createdAtFormatted %></div></td>
+                <td><div class="small-text"><%= user.lastActivityFormatted %></div></td>
                 <td>
                   <strong><%= user.answered %></strong>
                   <span class="muted"> / <%= totalQuestions %></span>
                 </td>
-
                 <td class="progress-cell">
                   <div class="progress-top">
                     <span><%= user.completion %>%</span>
@@ -401,7 +207,6 @@
                     <div class="progress-fill" style="width: <%= user.completion %>%"></div>
                   </div>
                 </td>
-
                 <td>
                   <% if (user.completed) { %>
                     <span class="pill pill-complete">Completado</span>
@@ -410,6 +215,9 @@
                   <% } else { %>
                     <span class="pill pill-not-started">Sin iniciar</span>
                   <% } %>
+                </td>
+                <td>
+                  <a class="action-link" href="/admin/user/<%= user.id %>">Ver detalle</a>
                 </td>
               </tr>
             <% }); %>

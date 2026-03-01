@@ -14,7 +14,7 @@ function requireAdmin(req, res, next) {
   next();
 }
 
-// Formatear fechas para mostrar
+// Formatear fechas
 function formatDate(dateValue) {
   if (!dateValue) return 'Sin registro';
 
@@ -30,7 +30,7 @@ function formatDate(dateValue) {
   });
 }
 
-// GET /admin/dashboard
+// Dashboard admin
 router.get('/dashboard', requireAdmin, (req, res) => {
   const progressFilter = req.query.progress || 'all';
 
@@ -58,8 +58,9 @@ router.get('/dashboard', requireAdmin, (req, res) => {
 
     let users = rows.map((row) => {
       const answered = Number(row.answered) || 0;
-      const completion =
-        totalQuestions > 0 ? Math.round((answered / totalQuestions) * 100) : 0;
+      const completion = totalQuestions > 0
+        ? Math.round((answered / totalQuestions) * 100)
+        : 0;
 
       const completed = completion >= 100;
       const notStarted = answered === 0;
@@ -82,7 +83,6 @@ router.get('/dashboard', requireAdmin, (req, res) => {
       };
     });
 
-    // Filtro por progreso
     if (progressFilter === 'completed') {
       users = users.filter((u) => u.completed);
     } else if (progressFilter === 'in-progress') {
@@ -91,21 +91,13 @@ router.get('/dashboard', requireAdmin, (req, res) => {
       users = users.filter((u) => u.notStarted);
     }
 
-    // Orden: completados primero, luego mayor avance, luego última actividad, luego fecha de registro
     users.sort((a, b) => {
-      if (a.completed !== b.completed) {
-        return a.completed ? -1 : 1;
-      }
-
-      if (b.completion !== a.completion) {
-        return b.completion - a.completion;
-      }
+      if (a.completed !== b.completed) return a.completed ? -1 : 1;
+      if (b.completion !== a.completion) return b.completion - a.completion;
 
       const aLast = a.lastActivity ? new Date(a.lastActivity).getTime() : 0;
       const bLast = b.lastActivity ? new Date(b.lastActivity).getTime() : 0;
-      if (bLast !== aLast) {
-        return bLast - aLast;
-      }
+      if (bLast !== aLast) return bLast - aLast;
 
       const aCreated = a.createdAt ? new Date(a.createdAt).getTime() : 0;
       const bCreated = b.createdAt ? new Date(b.createdAt).getTime() : 0;
@@ -120,7 +112,104 @@ router.get('/dashboard', requireAdmin, (req, res) => {
   });
 });
 
-// GET /admin/export/excel
+// Detalle individual de usuario
+router.get('/user/:id', requireAdmin, (req, res) => {
+  const userId = parseInt(req.params.id, 10);
+
+  if (isNaN(userId)) {
+    return res.redirect('/admin/dashboard');
+  }
+
+  const userSql = `
+    SELECT
+      u.id,
+      u.name,
+      u.email,
+      u.role,
+      u.created_at,
+      COUNT(a.id) AS answered,
+      MAX(a.updated_at) AS last_activity
+    FROM users u
+    LEFT JOIN answers a ON a.user_id = u.id
+    WHERE u.id = ?
+    GROUP BY u.id
+  `;
+
+  db.get(userSql, [userId], (err, userRow) => {
+    if (err) {
+      console.error(err);
+      return res.sendStatus(500);
+    }
+
+    if (!userRow) {
+      return res.status(404).send('Usuario no encontrado');
+    }
+
+    const answersSql = `
+      SELECT question_number, answer_text, updated_at
+      FROM answers
+      WHERE user_id = ?
+      ORDER BY question_number ASC
+    `;
+
+    db.all(answersSql, [userId], (answersErr, answerRows) => {
+      if (answersErr) {
+        console.error(answersErr);
+        return res.sendStatus(500);
+      }
+
+      const totalQuestions = questions.length;
+      const answered = Number(userRow.answered) || 0;
+      const completion = totalQuestions > 0
+        ? Math.round((answered / totalQuestions) * 100)
+        : 0;
+
+      const answersMap = {};
+      answerRows.forEach((row) => {
+        answersMap[row.question_number] = {
+          answer: row.answer_text,
+          updatedAt: row.updated_at,
+          updatedAtFormatted: formatDate(row.updated_at)
+        };
+      });
+
+      const detailedQuestions = questions.map((q, index) => {
+        const number = index + 1;
+        const saved = answersMap[number];
+
+        return {
+          number,
+          text: q.text,
+          type: q.type,
+          image: q.image || null,
+          answer: saved ? saved.answer : '',
+          hasAnswer: !!saved,
+          updatedAtFormatted: saved ? saved.updatedAtFormatted : 'Sin respuesta'
+        };
+      });
+
+      const user = {
+        id: userRow.id,
+        name: userRow.name,
+        email: userRow.email,
+        role: userRow.role,
+        answered,
+        completion,
+        completed: completion >= 100,
+        createdAtFormatted: formatDate(userRow.created_at),
+        lastActivityFormatted: formatDate(userRow.last_activity)
+      };
+
+      res.render('admin-user-detail', {
+        user,
+        detailedQuestions,
+        totalQuestions
+      });
+    });
+  });
+});
+
+// Exportar Excel
 router.get('/export/excel', requireAdmin, (req, res) => {
   const sql = `
     SELECT
@@ -176,7 +265,7 @@ router.get('/export/excel', requireAdmin, (req, res) => {
   });
 });
 
-// GET /admin/export/pdf
+// Exportar PDF
 router.get('/export/pdf', requireAdmin, (req, res) => {
   const sql = `
     SELECT
