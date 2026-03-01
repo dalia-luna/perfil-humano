@@ -5,7 +5,7 @@ const fs = require('fs');
 // Ruta configurable para Railway / producción
 const dbPath = process.env.DB_PATH || path.join(__dirname, 'database.sqlite');
 
-// Si el directorio no existe, lo crea
+// Crear directorio si no existe
 const dbDir = path.dirname(dbPath);
 if (!fs.existsSync(dbDir)) {
   fs.mkdirSync(dbDir, { recursive: true });
@@ -20,21 +20,12 @@ const db = new sqlite3.Database(dbPath, (err) => {
   console.log('Base de datos conectada en:', dbPath);
 });
 
-// Configuración robusta
 db.serialize(() => {
-  // Claves foráneas activas
   db.run('PRAGMA foreign_keys = ON');
-
-  // Mejor concurrencia de lectura/escritura
   db.run('PRAGMA journal_mode = WAL');
-
-  // Espera si la BD está ocupada
   db.run('PRAGMA busy_timeout = 5000');
-
-  // Balance razonable entre seguridad y rendimiento
   db.run('PRAGMA synchronous = NORMAL');
 
-  // Tablas principales
   db.run(`
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -58,7 +49,6 @@ db.serialize(() => {
     )
   `);
 
-  // Índices útiles
   db.run(`
     CREATE INDEX IF NOT EXISTS idx_answers_user_id
     ON answers(user_id)
