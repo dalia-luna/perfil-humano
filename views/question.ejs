@@ -18,7 +18,7 @@
     }
 
     .topbar {
-      max-width: 1100px;
+      max-width: 1200px;
       margin: 0 auto 20px auto;
       display: flex;
       justify-content: space-between;
@@ -39,14 +39,14 @@
       text-decoration: none;
       color: #2563eb;
       font-weight: bold;
-      background: rgba(255,255,255,0.75);
+      background: rgba(255, 255, 255, 0.78);
       padding: 10px 14px;
       border-radius: 999px;
       border: 1px solid #dbe3ea;
     }
 
     .container {
-      max-width: 1100px;
+      max-width: 1200px;
       margin: 0 auto;
       background: #ffffff;
       border-radius: 24px;
@@ -56,7 +56,7 @@
     }
 
     .header {
-      margin-bottom: 26px;
+      margin-bottom: 24px;
     }
 
     .header h1 {
@@ -65,8 +65,8 @@
     }
 
     .subtitle {
-      color: #64748b;
       margin: 0;
+      color: #64748b;
       line-height: 1.5;
     }
 
@@ -103,12 +103,20 @@
       border-radius: 999px;
     }
 
-    .question-box {
+    .question-layout {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 24px;
+      align-items: start;
+      margin-bottom: 24px;
+    }
+
+    .left-panel,
+    .right-panel {
       background: #f8fbff;
       border: 1px solid #dbe7f3;
       border-radius: 22px;
       padding: 24px;
-      margin-bottom: 24px;
     }
 
     .question-text {
@@ -120,24 +128,21 @@
     }
 
     .question-image-wrap {
-      margin: 10px 0 22px 0;
       display: flex;
       justify-content: center;
     }
 
     .question-image-card {
       width: 100%;
-      max-width: 700px;
       background: #ffffff;
       border: 1px solid #dbe3ea;
       border-radius: 20px;
       padding: 16px;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.6);
     }
 
     .question-image-card img {
       width: 100%;
-      max-height: 420px;
+      max-height: 500px;
       object-fit: contain;
       display: block;
       margin: 0 auto;
@@ -150,6 +155,26 @@
       text-align: center;
       color: #64748b;
       font-size: 0.92rem;
+    }
+
+    .no-image-box {
+      min-height: 220px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      border: 1px dashed #cbd5e1;
+      border-radius: 18px;
+      color: #64748b;
+      background: #fff;
+      padding: 20px;
+      line-height: 1.5;
+    }
+
+    .answer-title {
+      font-size: 1.1rem;
+      font-weight: bold;
+      margin-bottom: 16px;
     }
 
     label {
@@ -180,7 +205,7 @@
     }
 
     textarea {
-      min-height: 130px;
+      min-height: 150px;
       resize: vertical;
       line-height: 1.5;
     }
@@ -257,6 +282,16 @@
       line-height: 1.5;
     }
 
+    @media (max-width: 960px) {
+      .question-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .question-text {
+        text-align: left;
+      }
+    }
+
     @media (max-width: 768px) {
       body {
         padding: 16px;
@@ -272,7 +307,11 @@
 
       .question-text {
         font-size: 1.08rem;
-        text-align: left;
+      }
+
+      .left-panel,
+      .right-panel {
+        padding: 18px;
       }
 
       .question-image-card {
@@ -280,7 +319,7 @@
       }
 
       .question-image-card img {
-        max-height: 300px;
+        max-height: 320px;
       }
 
       .actions {
@@ -290,8 +329,8 @@
 
       button,
       .secondary-link {
-        text-align: center;
         width: 100%;
+        text-align: center;
       }
     }
   </style>
@@ -313,7 +352,7 @@
   <div class="container">
     <div class="header">
       <h1>Pregunta <%= number %></h1>
-      <p class="subtitle">Lee con calma, observa la imagen de apoyo y guarda tu respuesta para continuar.</p>
+      <p class="subtitle">Observa la imagen de referencia y responde con la opción que mejor te describa.</p>
     </div>
 
     <div class="progress-wrap">
@@ -329,67 +368,78 @@
     <form action="/questionnaire/question/<%= number %>" method="POST">
       <input type="hidden" name="mode" value="<%= mode %>" />
 
-      <div class="question-box">
-        <div class="question-text"><%= question.text %></div>
+      <div class="question-layout">
+        <div class="left-panel">
+          <div class="question-text"><%= question.text %></div>
 
-        <% if (question.image) { %>
-          <div class="question-image-wrap">
-            <div class="question-image-card">
-              <img src="<%= question.image %>" alt="Imagen de apoyo de la pregunta" />
-              <div class="question-image-note">Imagen de referencia para responder esta pregunta</div>
-            </div>
-          </div>
-        <% } %>
-
-        <% if (question.type === 'select') { %>
-          <label for="answer">Selecciona la opción que mejor te describe:</label>
-          <select id="answer" name="answer" required>
-            <option value="">Selecciona una opción...</option>
-            <% question.options.forEach(function(opt) { %>
-              <option value="<%= opt %>" <%= existingAnswer === opt ? 'selected' : '' %>><%= opt %></option>
-            <% }); %>
-          </select>
-
-        <% } else if (question.type === 'radio') { %>
-          <label>Selecciona la opción que mejor te describe:</label>
-          <div class="radio-group">
-            <% question.options.forEach(function(opt, index) { %>
-              <div class="radio-item">
-                <input
-                  type="radio"
-                  id="opt_<%= index %>"
-                  name="answer"
-                  value="<%= opt %>"
-                  <%= existingAnswer === opt ? 'checked' : '' %>
-                  required
-                />
-                <label for="opt_<%= index %>"><%= opt %></label>
+          <% if (question.image) { %>
+            <div class="question-image-wrap">
+              <div class="question-image-card">
+                <img src="<%= question.image %>" alt="Imagen de apoyo de la pregunta" />
+                <div class="question-image-note">Imagen de referencia para responder esta pregunta</div>
               </div>
-            <% }); %>
+            </div>
+          <% } else { %>
+            <div class="no-image-box">
+              Esta pregunta no contiene imagen de apoyo.<br />
+              Puedes responder directamente en el panel derecho.
+            </div>
+          <% } %>
+        </div>
+
+        <div class="right-panel">
+          <div class="answer-title">Tu respuesta</div>
+
+          <% if (question.type === 'select') { %>
+            <label for="answer">Selecciona la opción que mejor te describe:</label>
+            <select id="answer" name="answer" required>
+              <option value="">Selecciona una opción...</option>
+              <% question.options.forEach(function(opt) { %>
+                <option value="<%= opt %>" <%= existingAnswer === opt ? 'selected' : '' %>><%= opt %></option>
+              <% }); %>
+            </select>
+
+          <% } else if (question.type === 'radio') { %>
+            <label>Selecciona la opción que mejor te describe:</label>
+            <div class="radio-group">
+              <% question.options.forEach(function(opt, index) { %>
+                <div class="radio-item">
+                  <input
+                    type="radio"
+                    id="opt_<%= index %>"
+                    name="answer"
+                    value="<%= opt %>"
+                    <%= existingAnswer === opt ? 'checked' : '' %>
+                    required
+                  />
+                  <label for="opt_<%= index %>"><%= opt %></label>
+                </div>
+              <% }); %>
+            </div>
+
+          <% } else { %>
+            <label for="answer">Escribe tu respuesta:</label>
+            <textarea id="answer" name="answer" required><%= existingAnswer || '' %></textarea>
+          <% } %>
+
+          <div class="actions">
+            <button type="submit">
+              <%= number === totalQuestions && mode === 'normal' ? 'Guardar y finalizar' : 'Guardar y continuar' %>
+            </button>
+
+            <a class="secondary-link" href="/questionnaire/edit-answers">Ir al resumen</a>
           </div>
 
-        <% } else { %>
-          <label for="answer">Tu respuesta:</label>
-          <textarea id="answer" name="answer" required><%= existingAnswer || '' %></textarea>
-        <% } %>
-      </div>
-
-      <div class="actions">
-        <button type="submit">
-          <%= number === totalQuestions && mode === 'normal' ? 'Guardar y finalizar' : 'Guardar y continuar' %>
-        </button>
-
-        <a class="secondary-link" href="/questionnaire/edit-answers">Ir al resumen</a>
-      </div>
-
-      <div class="helper">
-        <% if (mode === 'normal' && number < totalQuestions) { %>
-          Tu respuesta se guardará y avanzarás automáticamente a la siguiente pregunta.
-        <% } else if (mode === 'edit') { %>
-          Tu cambio se guardará y volverás al panel de edición de respuestas.
-        <% } else { %>
-          Tu respuesta se guardará correctamente.
-        <% } %>
+          <div class="helper">
+            <% if (mode === 'normal' && number < totalQuestions) { %>
+              Tu respuesta se guardará y avanzarás automáticamente a la siguiente pregunta.
+            <% } else if (mode === 'edit') { %>
+              Tu cambio se guardará y volverás al panel de edición de respuestas.
+            <% } else { %>
+              Tu respuesta se guardará correctamente.
+            <% } %>
+          </div>
+        </div>
       </div>
     </form>
   </div>
