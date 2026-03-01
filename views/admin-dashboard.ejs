@@ -18,7 +18,7 @@
     }
 
     .topbar {
-      max-width: 1200px;
+      max-width: 1300px;
       margin: 0 auto 20px auto;
       display: flex;
       justify-content: space-between;
@@ -40,7 +40,8 @@
 
     .btn,
     .btn-secondary,
-    .btn-danger {
+    .btn-danger,
+    .filter-link {
       display: inline-block;
       padding: 12px 18px;
       border-radius: 999px;
@@ -65,8 +66,20 @@
       color: #991b1b;
     }
 
+    .filter-link {
+      background: #e2e8f0;
+      color: #334155;
+      padding: 10px 14px;
+      font-size: 0.95rem;
+    }
+
+    .filter-link.active {
+      background: #2563eb;
+      color: white;
+    }
+
     .container {
-      max-width: 1200px;
+      max-width: 1300px;
       margin: 0 auto;
       display: grid;
       gap: 20px;
@@ -110,8 +123,22 @@
       font-size: 1.35rem;
     }
 
+    .toolbar-block {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+      min-width: 280px;
+    }
+
+    .filters {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
     .search-box input {
-      width: 320px;
+      width: 340px;
       max-width: 100%;
       padding: 12px 14px;
       border: 1px solid #cbd5e1;
@@ -132,7 +159,7 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 980px;
+      min-width: 1200px;
     }
 
     thead {
@@ -195,6 +222,11 @@
       color: #92400e;
     }
 
+    .pill-not-started {
+      background: #e2e8f0;
+      color: #475569;
+    }
+
     .progress-cell {
       min-width: 240px;
     }
@@ -226,6 +258,12 @@
       font-size: 0.95rem;
     }
 
+    .small-text {
+      font-size: 0.9rem;
+      color: #475569;
+      line-height: 1.4;
+    }
+
     .empty {
       padding: 28px;
       text-align: center;
@@ -237,7 +275,8 @@
   <%
     const totalUsers = users.length;
     const completedUsers = users.filter(u => u.completed).length;
-    const inProgressUsers = totalUsers - completedUsers;
+    const inProgressUsers = users.filter(u => u.inProgress).length;
+    const notStartedUsers = users.filter(u => u.notStarted).length;
     const avgCompletion = totalUsers
       ? Math.round(users.reduce((acc, u) => acc + u.completion, 0) / totalUsers)
       : 0;
@@ -256,18 +295,23 @@
   <div class="container">
     <div class="stats">
       <div class="card">
-        <div class="stat-label">Usuarios registrados</div>
+        <div class="stat-label">Usuarios visibles</div>
         <div class="stat-value"><%= totalUsers %></div>
       </div>
 
       <div class="card">
-        <div class="stat-label">Perfiles completados</div>
+        <div class="stat-label">Completados</div>
         <div class="stat-value"><%= completedUsers %></div>
       </div>
 
       <div class="card">
         <div class="stat-label">En progreso</div>
         <div class="stat-value"><%= inProgressUsers %></div>
+      </div>
+
+      <div class="card">
+        <div class="stat-label">Sin iniciar</div>
+        <div class="stat-value"><%= notStartedUsers %></div>
       </div>
 
       <div class="card">
@@ -278,16 +322,25 @@
 
     <div class="card">
       <div class="toolbar">
-        <div>
-          <h2>Usuarios y progreso</h2>
-          <div class="muted">Total de preguntas por perfil: <%= totalQuestions %></div>
+        <div class="toolbar-block">
+          <div>
+            <h2>Usuarios y progreso</h2>
+            <div class="muted">Total de preguntas por perfil: <%= totalQuestions %></div>
+          </div>
+
+          <div class="filters">
+            <a class="filter-link <%= progressFilter === 'all' ? 'active' : '' %>" href="/admin/dashboard?progress=all">Todos</a>
+            <a class="filter-link <%= progressFilter === 'completed' ? 'active' : '' %>" href="/admin/dashboard?progress=completed">Completados</a>
+            <a class="filter-link <%= progressFilter === 'in-progress' ? 'active' : '' %>" href="/admin/dashboard?progress=in-progress">En progreso</a>
+            <a class="filter-link <%= progressFilter === 'not-started' ? 'active' : '' %>" href="/admin/dashboard?progress=not-started">Sin iniciar</a>
+          </div>
         </div>
 
         <div class="search-box">
           <input
             type="text"
             id="userSearch"
-            placeholder="Buscar por nombre, correo o rol..."
+            placeholder="Buscar por nombre, correo, rol o estado..."
           />
         </div>
       </div>
@@ -295,7 +348,7 @@
 
     <div class="table-wrap">
       <% if (!users.length) { %>
-        <div class="empty">Aún no hay usuarios registrados.</div>
+        <div class="empty">No hay usuarios para este filtro.</div>
       <% } else { %>
         <table id="usersTable">
           <thead>
@@ -303,6 +356,8 @@
               <th>ID</th>
               <th>Usuario</th>
               <th>Rol</th>
+              <th>Registro</th>
+              <th>Última actividad</th>
               <th>Respondidas</th>
               <th>Avance</th>
               <th>Estado</th>
@@ -325,6 +380,14 @@
                 </td>
 
                 <td>
+                  <div class="small-text"><%= user.createdAtFormatted %></div>
+                </td>
+
+                <td>
+                  <div class="small-text"><%= user.lastActivityFormatted %></div>
+                </td>
+
+                <td>
                   <strong><%= user.answered %></strong>
                   <span class="muted"> / <%= totalQuestions %></span>
                 </td>
@@ -342,8 +405,10 @@
                 <td>
                   <% if (user.completed) { %>
                     <span class="pill pill-complete">Completado</span>
-                  <% } else { %>
+                  <% } else if (user.inProgress) { %>
                     <span class="pill pill-progress">En progreso</span>
+                  <% } else { %>
+                    <span class="pill pill-not-started">Sin iniciar</span>
                   <% } %>
                 </td>
               </tr>
