@@ -12,13 +12,13 @@
 
     body {
       margin: 0;
-      background: #eaf0f6;
+      background: linear-gradient(180deg, #eef4fb 0%, #f8fbff 100%);
+      color: #0f172a;
       padding: 24px;
-      color: #111827;
     }
 
     .topbar {
-      max-width: 950px;
+      max-width: 1100px;
       margin: 0 auto 20px auto;
       display: flex;
       justify-content: space-between;
@@ -39,33 +39,53 @@
       text-decoration: none;
       color: #2563eb;
       font-weight: bold;
+      background: rgba(255,255,255,0.75);
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid #dbe3ea;
     }
 
     .container {
-      max-width: 950px;
+      max-width: 1100px;
       margin: 0 auto;
-      background: #fff;
-      border-radius: 20px;
+      background: #ffffff;
+      border-radius: 24px;
       padding: 32px;
-      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+      border: 1px solid #e5e7eb;
     }
 
-    h1 {
-      margin-bottom: 8px;
+    .header {
+      margin-bottom: 26px;
+    }
+
+    .header h1 {
+      margin: 0 0 8px 0;
       font-size: 2rem;
     }
 
     .subtitle {
-      color: #6b7280;
-      margin-bottom: 24px;
+      color: #64748b;
+      margin: 0;
+      line-height: 1.5;
     }
 
     .progress-wrap {
       margin-bottom: 28px;
+      padding: 18px 20px;
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 18px;
     }
 
-    .progress-label {
-      margin-bottom: 8px;
+    .progress-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+      font-size: 0.95rem;
+      color: #475569;
       font-weight: bold;
     }
 
@@ -80,55 +100,89 @@
     .progress-fill {
       height: 100%;
       background: linear-gradient(90deg, #2563eb, #22c55e);
+      border-radius: 999px;
     }
 
     .question-box {
+      background: #f8fbff;
+      border: 1px solid #dbe7f3;
+      border-radius: 22px;
+      padding: 24px;
       margin-bottom: 24px;
-      padding: 20px;
-      border-radius: 16px;
-      background: #f8fafc;
-      border: 1px solid #e5e7eb;
     }
 
     .question-text {
-      font-size: 1.2rem;
+      font-size: 1.22rem;
       font-weight: bold;
-      margin-bottom: 18px;
-      line-height: 1.5;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      text-align: justify;
     }
 
-    .question-image {
-      margin: 14px 0 18px 0;
-      text-align: center;
+    .question-image-wrap {
+      margin: 10px 0 22px 0;
+      display: flex;
+      justify-content: center;
     }
 
-    .question-image img {
-      max-width: 100%;
-      border-radius: 14px;
+    .question-image-card {
+      width: 100%;
+      max-width: 700px;
+      background: #ffffff;
       border: 1px solid #dbe3ea;
-      background: #fff;
+      border-radius: 20px;
+      padding: 16px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.6);
+    }
+
+    .question-image-card img {
+      width: 100%;
+      max-height: 420px;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+      border-radius: 14px;
+      background: #ffffff;
+    }
+
+    .question-image-note {
+      margin-top: 10px;
+      text-align: center;
+      color: #64748b;
+      font-size: 0.92rem;
     }
 
     label {
       display: block;
       margin-bottom: 10px;
       font-weight: bold;
+      color: #0f172a;
     }
 
     textarea,
     select,
     input[type="text"] {
       width: 100%;
-      padding: 14px;
-      border-radius: 12px;
+      padding: 14px 16px;
+      border-radius: 14px;
       border: 1px solid #cbd5e1;
       font-size: 1rem;
       margin-bottom: 20px;
+      background: #fff;
+      outline: none;
+    }
+
+    textarea:focus,
+    select:focus,
+    input[type="text"]:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
     }
 
     textarea {
-      min-height: 120px;
+      min-height: 130px;
       resize: vertical;
+      line-height: 1.5;
     }
 
     .radio-group {
@@ -140,11 +194,17 @@
     .radio-item {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 12px 14px;
+      gap: 12px;
+      padding: 14px 16px;
       border: 1px solid #dbe3ea;
-      border-radius: 12px;
-      background: #fff;
+      border-radius: 14px;
+      background: #ffffff;
+      transition: 0.2s ease;
+    }
+
+    .radio-item:hover {
+      border-color: #93c5fd;
+      background: #f8fbff;
     }
 
     .radio-item label {
@@ -152,12 +212,14 @@
       font-weight: normal;
       cursor: pointer;
       width: 100%;
+      line-height: 1.4;
     }
 
     .actions {
       display: flex;
       gap: 12px;
       flex-wrap: wrap;
+      align-items: center;
       margin-top: 8px;
     }
 
@@ -176,6 +238,7 @@
     button {
       background: #2563eb;
       color: white;
+      box-shadow: 0 8px 18px rgba(37, 99, 235, 0.18);
     }
 
     button:hover {
@@ -188,9 +251,48 @@
     }
 
     .helper {
-      margin-top: 14px;
-      color: #6b7280;
+      margin-top: 16px;
+      color: #64748b;
       font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 16px;
+      }
+
+      .container {
+        padding: 22px;
+      }
+
+      .header h1 {
+        font-size: 1.7rem;
+      }
+
+      .question-text {
+        font-size: 1.08rem;
+        text-align: left;
+      }
+
+      .question-image-card {
+        padding: 10px;
+      }
+
+      .question-image-card img {
+        max-height: 300px;
+      }
+
+      .actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      button,
+      .secondary-link {
+        text-align: center;
+        width: 100%;
+      }
     }
   </style>
 </head>
@@ -209,11 +311,16 @@
   </div>
 
   <div class="container">
-    <h1>Pregunta <%= number %></h1>
-    <p class="subtitle">Responde y guarda para continuar.</p>
+    <div class="header">
+      <h1>Pregunta <%= number %></h1>
+      <p class="subtitle">Lee con calma, observa la imagen de apoyo y guarda tu respuesta para continuar.</p>
+    </div>
 
     <div class="progress-wrap">
-      <div class="progress-label">Avance: <%= progressPercent.toFixed(1) %>%</div>
+      <div class="progress-top">
+        <span>Avance general</span>
+        <span><%= progressPercent.toFixed(1) %>%</span>
+      </div>
       <div class="progress-bar">
         <div class="progress-fill" style="width: <%= progressPercent %>%;"></div>
       </div>
@@ -226,8 +333,11 @@
         <div class="question-text"><%= question.text %></div>
 
         <% if (question.image) { %>
-          <div class="question-image">
-            <img src="<%= question.image %>" alt="Imagen de apoyo de la pregunta" />
+          <div class="question-image-wrap">
+            <div class="question-image-card">
+              <img src="<%= question.image %>" alt="Imagen de apoyo de la pregunta" />
+              <div class="question-image-note">Imagen de referencia para responder esta pregunta</div>
+            </div>
           </div>
         <% } %>
 
@@ -266,7 +376,7 @@
 
       <div class="actions">
         <button type="submit">
-          <%= number === totalQuestions && mode === 'normal' ? 'Guardar y finalizar' : 'Guardar' %>
+          <%= number === totalQuestions && mode === 'normal' ? 'Guardar y finalizar' : 'Guardar y continuar' %>
         </button>
 
         <a class="secondary-link" href="/questionnaire/edit-answers">Ir al resumen</a>
@@ -274,11 +384,11 @@
 
       <div class="helper">
         <% if (mode === 'normal' && number < totalQuestions) { %>
-          Se guardará tu respuesta y continuarás con la siguiente pregunta.
+          Tu respuesta se guardará y avanzarás automáticamente a la siguiente pregunta.
         <% } else if (mode === 'edit') { %>
-          Se guardará tu cambio y regresarás al panel de edición de respuestas.
+          Tu cambio se guardará y volverás al panel de edición de respuestas.
         <% } else { %>
-          Se guardará tu respuesta.
+          Tu respuesta se guardará correctamente.
         <% } %>
       </div>
     </form>
