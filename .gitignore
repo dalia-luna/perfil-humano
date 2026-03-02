@@ -1,9 +1,6 @@
-# Ignorar node_modules (nunca subirla)
-node_modules/
-
-# Otros útiles (opcional)
-.DS_Store
-*.log
-.env
-# Si no quieres subir la DB cada vez (puedes regenerarla con tu XLSX)
+node_modules
 database.sqlite
+database.sqlite-shm
+database.sqlite-wal
+.env
+.DS_Store
