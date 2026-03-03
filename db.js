@@ -2,24 +2,21 @@ const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const fs = require('fs');
 
-const localDbPath = path.join(__dirname, 'database.sqlite');
-const dbPath = process.env.DB_PATH || localDbPath;
+const isProduction = process.env.NODE_ENV === 'production';
+const configuredDbPath = process.env.DB_PATH;
+
+// En producción, obligamos a usar DB_PATH (la base del volumen)
+if (isProduction && !configuredDbPath) {
+  throw new Error('Falta DB_PATH en producción. Configura DB_PATH=/data/database.sqlite en Railway.');
+}
+
+// En local puedes seguir usando database.sqlite
+const dbPath = configuredDbPath || path.join(__dirname, 'database.sqlite');
 
 // Crear directorio si no existe
 const dbDir = path.dirname(dbPath);
 if (!fs.existsSync(dbDir)) {
   fs.mkdirSync(dbDir, { recursive: true });
-}
-
-// Si estamos usando volumen y aún no existe la base del volumen,
-// copiamos una sola vez la base local al volumen.
-if (dbPath !== localDbPath && !fs.existsSync(dbPath) && fs.existsSync(localDbPath)) {
-  try {
-    fs.copyFileSync(localDbPath, dbPath);
-    console.log(`Base inicial copiada al volumen: ${localDbPath} -> ${dbPath}`);
-  } catch (err) {
-    console.error('No se pudo copiar la base inicial al volumen:', err.message);
-  }
 }
 
 const db = new sqlite3.Database(dbPath, (err) => {
@@ -68,6 +65,11 @@ db.serialize(() => {
   db.run(`
     CREATE INDEX IF NOT EXISTS idx_answers_user_question
     ON answers(user_id, question_number)
+  `);
+
+  db.run(`
+    CREATE INDEX IF NOT EXISTS idx_answers_updated_at
+    ON answers(updated_at)
   `);
 });
 

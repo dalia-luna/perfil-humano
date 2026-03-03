@@ -7,12 +7,17 @@
     "start": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["perfil", "digital", "humano"],
+  "keywords": [
+    "perfil",
+    "digital",
+    "humano"
+  ],
   "author": "Dalia",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "connect-sqlite3": "^0.9.16",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
     "express-session": "^1.18.2",

@@ -1,8 +1,9 @@
 const express = require('express');
 const path = require('path');
 const session = require('express-session');
+const SQLiteStore = require('connect-sqlite3')(session);
 
-// Inicializa la base de datos
+// Conexión a DB
 require('./db.js');
 
 // Rutas
@@ -12,27 +13,38 @@ const questionnaireRoutes = require('./routes/questionnaire');
 
 const app = express();
 
-// Importante en Railway
+// Importante en Railway / proxies
 app.set('trust proxy', 1);
 
-// Configuración de vistas
+// Configuración EJS
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Middlewares
+// Parse body
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+// Archivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Sesiones
+// Ruta del archivo de sesiones persistentes
+const sessionDbPath = process.env.SESSION_DB_PATH || '/data/sessions.sqlite';
+
+// Sesiones persistentes en SQLite
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || 'tu-secreto-super-seguro-1234567890',
+    store: new SQLiteStore({
+      db: path.basename(sessionDbPath),
+      dir: path.dirname(sessionDbPath)
+    }),
+    secret: process.env.SESSION_SECRET || 'PerfilHumanoDigital_2026_Clave_Muy_Segura_#8472',
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 24 * 60 * 60 * 1000
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 días
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production'
     }
   })
 );
