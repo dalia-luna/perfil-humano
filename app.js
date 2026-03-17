@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const session = require('express-session');
 const SQLiteStore = require('connect-sqlite3')(session);
 
@@ -28,7 +29,16 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Ruta del archivo de sesiones persistentes
-const sessionDbPath = process.env.SESSION_DB_PATH || '/data/sessions.sqlite';
+const isProduction = process.env.NODE_ENV === 'production';
+const sessionDbPath = process.env.SESSION_DB_PATH ||
+  (isProduction
+    ? '/data/sessions.sqlite'
+    : path.join(__dirname, 'sessions.sqlite'));
+
+const sessionDir = path.dirname(sessionDbPath);
+if (!fs.existsSync(sessionDir)) {
+  fs.mkdirSync(sessionDir, { recursive: true });
+}
 
 // Sesiones persistentes en SQLite
 app.use(

@@ -34,6 +34,9 @@ db.serialize(() => {
   db.run('PRAGMA busy_timeout = 5000');
   db.run('PRAGMA synchronous = NORMAL');
 
+  // =========================
+  // TABLAS EXISTENTES
+  // =========================
   db.run(`
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -70,6 +73,104 @@ db.serialize(() => {
   db.run(`
     CREATE INDEX IF NOT EXISTS idx_answers_updated_at
     ON answers(updated_at)
+  `);
+
+  // =========================
+  // TABLAS NUEVAS PARA CASOS
+  // =========================
+  db.run(`
+    CREATE TABLE IF NOT EXISTS cases (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      created_by_user_id INTEGER NOT NULL,
+      case_code TEXT UNIQUE,
+      person_name TEXT,
+      alias TEXT,
+      status TEXT NOT NULL DEFAULT 'captura_inicial',
+      source_type TEXT NOT NULL DEFAULT 'familiar',
+      report_date DATETIME,
+      found_date DATETIME,
+      country TEXT DEFAULT 'México',
+      state TEXT,
+      municipality TEXT,
+      notes TEXT,
+      is_active INTEGER NOT NULL DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY(created_by_user_id) REFERENCES users(id) ON DELETE CASCADE
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS case_answers (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      case_id INTEGER NOT NULL,
+      question_number INTEGER NOT NULL,
+      answer_text TEXT,
+      confidence_level TEXT DEFAULT 'medio',
+      evidence_type TEXT DEFAULT 'familiar',
+      is_confirmed INTEGER NOT NULL DEFAULT 0,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(case_id, question_number),
+      FOREIGN KEY(case_id) REFERENCES cases(id) ON DELETE CASCADE
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS case_sources (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      case_id INTEGER NOT NULL,
+      source_type TEXT NOT NULL,
+      source_title TEXT,
+      source_url TEXT,
+      source_notes TEXT,
+      captured_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY(case_id) REFERENCES cases(id) ON DELETE CASCADE
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS case_events (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      case_id INTEGER NOT NULL,
+      event_type TEXT NOT NULL,
+      event_date DATETIME,
+      description TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY(case_id) REFERENCES cases(id) ON DELETE CASCADE
+    )
+  `);
+
+  // =========================
+  // ÍNDICES NUEVOS
+  // =========================
+  db.run(`
+    CREATE INDEX IF NOT EXISTS idx_cases_created_by_user
+    ON cases(created_by_user_id)
+  `);
+
+  db.run(`
+    CREATE INDEX IF NOT EXISTS idx_cases_status
+    ON cases(status)
+  `);
+
+  db.run(`
+    CREATE INDEX IF NOT EXISTS idx_case_answers_case_id
+    ON case_answers(case_id)
+  `);
+
+  db.run(`
+    CREATE INDEX IF NOT EXISTS idx_case_answers_case_question
+    ON case_answers(case_id, question_number)
+  `);
+
+  db.run(`
+    CREATE INDEX IF NOT EXISTS idx_case_sources_case_id
+    ON case_sources(case_id)
+  `);
+
+  db.run(`
+    CREATE INDEX IF NOT EXISTS idx_case_events_case_id
+    ON case_events(case_id)
   `);
 });
 
