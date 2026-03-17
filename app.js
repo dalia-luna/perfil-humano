@@ -11,6 +11,7 @@ require('./db.js');
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const questionnaireRoutes = require('./routes/questionnaire');
+const caseRoutes = require('./routes/cases');
 
 const app = express();
 
@@ -51,7 +52,7 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 días
+      maxAge: 1000 * 60 * 60 * 24 * 7,
       httpOnly: true,
       sameSite: 'lax',
       secure: process.env.NODE_ENV === 'production'
@@ -70,6 +71,7 @@ app.use((req, res, next) => {
 app.use('/', authRoutes);
 app.use('/admin', adminRoutes);
 app.use('/questionnaire', questionnaireRoutes);
+app.use('/cases', caseRoutes);
 
 // Ruta principal
 app.get('/', (req, res) => {

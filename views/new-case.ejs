@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title><%= title %></title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      margin-top: 0;
+      color: #222;
+    }
+
+    .message {
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .error {
+      background: #fdecea;
+      color: #b71c1c;
+    }
+
+    .success {
+      background: #e8f5e9;
+      color: #1b5e20;
+    }
+
+    form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .full-width {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #cfd8dc;
+      border-radius: 8px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .actions {
+      grid-column: 1 / -1;
+      display: flex;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    button, a.button-link {
+      background: #1976d2;
+      color: white;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 8px;
+      text-decoration: none;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    a.button-link {
+      background: #607d8b;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover, a.button-link:hover {
+      opacity: 0.9;
+    }
+
+    @media (max-width: 700px) {
+      form {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Registrar nuevo caso</h1>
+
+    <% if (error) { %>
+      <div class="message error"><%= error %></div>
+    <% } %>
+
+    <% if (success) { %>
+      <div class="message success"><%= success %></div>
+    <% } %>
+
+    <form action="/cases/new" method="POST">
+      <div>
+        <label for="case_code">Código del caso</label>
+        <input type="text" id="case_code" name="case_code" placeholder="Ej. CASO-001" />
+      </div>
+
+      <div>
+        <label for="person_name">Nombre de la persona</label>
+        <input type="text" id="person_name" name="person_name" placeholder="Nombre completo o parcial" />
+      </div>
+
+      <div>
+        <label for="alias">Alias o referencia</label>
+        <input type="text" id="alias" name="alias" placeholder="Ej. Mujer 1 / Caso Toluca" />
+      </div>
+
+      <div>
+        <label for="status">Estatus</label>
+        <select id="status" name="status">
+          <option value="captura_inicial">Captura inicial</option>
+          <option value="reportada">Reportada</option>
+          <option value="localizada_con_vida">Localizada con vida</option>
+          <option value="cerrada">Cerrada</option>
+          <option value="descartada">Descartada</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="source_type">Tipo de fuente</label>
+        <select id="source_type" name="source_type">
+          <option value="familiar">Familiar</option>
+          <option value="fuente_publica">Fuente pública</option>
+          <option value="oficial">Oficial</option>
+          <option value="entrevista_directa">Entrevista directa</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="country">País</label>
+        <input type="text" id="country" name="country" value="México" />
+      </div>
+
+      <div>
+        <label for="report_date">Fecha de reporte</label>
+        <input type="date" id="report_date" name="report_date" />
+      </div>
+
+      <div>
+        <label for="found_date">Fecha de localización</label>
+        <input type="date" id="found_date" name="found_date" />
+      </div>
+
+      <div>
+        <label for="state">Estado</label>
+        <input type="text" id="state" name="state" placeholder="Ej. Estado de México" />
+      </div>
+
+      <div>
+        <label for="municipality">Municipio</label>
+        <input type="text" id="municipality" name="municipality" placeholder="Ej. Tlalnepantla" />
+      </div>
+
+      <div class="full-width">
+        <label for="notes">Observaciones</label>
+        <textarea id="notes" name="notes" placeholder="Notas generales del caso"></textarea>
+      </div>
+
+      <div class="actions">
+        <button type="submit">Guardar caso</button>
+        <a class="button-link" href="/admin/dashboard">Volver al panel</a>
+      </div>
+    </form>
+  </div>
+</body>
+</html>
