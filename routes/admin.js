@@ -35,7 +35,7 @@ router.get('/dashboard', requireAdmin, (req, res) => {
   const progressFilter = req.query.progress || 'all';
 
   const sql = `
-    SELECT
+    SELECT 
       u.id,
       u.name,
       u.email,
@@ -121,7 +121,7 @@ router.get('/user/:id', requireAdmin, (req, res) => {
   }
 
   const userSql = `
-    SELECT
+    SELECT 
       u.id,
       u.name,
       u.email,
@@ -209,13 +209,14 @@ router.get('/user/:id', requireAdmin, (req, res) => {
   });
 });
 
-// Exportar Excel
+// Exportar Excel mejorado: una fila por usuario
 router.get('/export/excel', requireAdmin, (req, res) => {
   const sql = `
-    SELECT
+    SELECT 
       u.id AS user_id,
       u.name,
       u.email,
+      u.role,
       u.created_at,
       a.question_number,
       a.answer_text,
@@ -231,36 +232,95 @@ router.get('/export/excel', requireAdmin, (req, res) => {
       return res.sendStatus(500);
     }
 
-    const data = rows.map((row) => {
-      const questionObj = row.question_number ? questions[row.question_number - 1] : null;
-      const questionText = questionObj ? questionObj.text : '';
+    const totalQuestions = questions.length;
+    const usersMap = {};
 
-      return {
-        Usuario_ID: row.user_id,
-        Nombre: row.name,
-        Correo: row.email,
-        Fecha_Registro: row.created_at || '',
-        Pregunta_Numero: row.question_number || '',
-        Pregunta_Texto: questionText,
-        Respuesta: row.answer_text || '',
-        Ultima_Actualizacion: row.updated_at || ''
-      };
+    rows.forEach((row) => {
+      if (!usersMap[row.user_id]) {
+        const baseRow = {
+          Usuario_ID: row.user_id,
+          Nombre: row.name || '',
+          Correo: row.email || '',
+          Rol: row.role || '',
+          Fecha_Registro: row.created_at || '',
+          Respuestas_Contestadas: 0,
+          Porcentaje_Avance: 0,
+          Estado_Cuestionario: 'Sin iniciar',
+          Ultima_Actividad: ''
+        };
+
+        for (let i = 1; i <= totalQuestions; i++) {
+          baseRow[`P${i}`] = '';
+        }
+
+        usersMap[row.user_id] = baseRow;
+      }
+
+      if (row.question_number) {
+        usersMap[row.user_id][`P${row.question_number}`] = row.answer_text || '';
+        usersMap[row.user_id].Respuestas_Contestadas += 1;
+
+        if (
+          row.updated_at &&
+          (
+            !usersMap[row.user_id].Ultima_Actividad ||
+            new Date(row.updated_at) > new Date(usersMap[row.user_id].Ultima_Actividad)
+          )
+        ) {
+          usersMap[row.user_id].Ultima_Actividad = row.updated_at;
+        }
+      }
     });
 
-    const worksheet = XLSX.utils.json_to_sheet(data);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Respuestas');
+    const data = Object.values(usersMap).map((userRow) => {
+      const answered = userRow.Respuestas_Contestadas || 0;
+      const completion = totalQuestions > 0
+        ? Math.round((answered / totalQuestions) * 100)
+        : 0;
 
-    const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+      userRow.Porcentaje_Avance = completion;
+
+      if (answered === 0) {
+        userRow.Estado_Cuestionario = 'Sin iniciar';
+      } else if (completion >= 100) {
+        userRow.Estado_Cuestionario = 'Completado';
+      } else {
+        userRow.Estado_Cuestionario = 'En progreso';
+      }
+
+      return userRow;
+    });
+
+    const questionsSheetData = questions.map((q, index) => ({
+      Pregunta_Numero: index + 1,
+      Columna_Excel: `P${index + 1}`,
+      Texto_Pregunta: q.text || '',
+      Tipo: q.type || '',
+      Opciones: Array.isArray(q.options) ? q.options.join(' | ') : ''
+    }));
+
+    const workbook = XLSX.utils.book_new();
+
+    const worksheetData = XLSX.utils.json_to_sheet(data);
+    XLSX.utils.book_append_sheet(workbook, worksheetData, 'Respuestas');
+
+    const worksheetQuestions = XLSX.utils.json_to_sheet(questionsSheetData);
+    XLSX.utils.book_append_sheet(workbook, worksheetQuestions, 'Diccionario');
+
+    const buffer = XLSX.write(workbook, {
+      type: 'buffer',
+      bookType: 'xlsx'
+    });
 
     res.setHeader(
       'Content-Disposition',
-      'attachment; filename="perfiles_humano_digital.xlsx"'
+      'attachment; filename="perfiles_humano_digital_matriz.xlsx"'
     );
     res.setHeader(
       'Content-Type',
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     );
+
     res.send(buffer);
   });
 });
@@ -268,7 +328,7 @@ router.get('/export/excel', requireAdmin, (req, res) => {
 // Exportar PDF
 router.get('/export/pdf', requireAdmin, (req, res) => {
   const sql = `
-    SELECT
+    SELECT 
       u.id AS user_id,
       u.name,
       u.email,
@@ -305,7 +365,6 @@ router.get('/export/pdf', requireAdmin, (req, res) => {
     rows.forEach((row) => {
       if (row.user_id !== currentUserId) {
         currentUserId = row.user_id;
-
         doc.moveDown(0.5);
         doc.fontSize(13).text(`Usuario #${row.user_id}: ${row.name} <${row.email}>`);
         doc.fontSize(10).text(`Fecha de registro: ${row.created_at || 'Sin registro'}`);
