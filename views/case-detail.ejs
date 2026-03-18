@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title><%= title %></title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 0;
+      color: #0f172a;
+    }
+
+    .container {
+      max-width: 950px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      margin: 0;
+      color: #222;
+    }
+
+    .meta {
+      color: #64748b;
+      font-size: 0.95rem;
+      margin-top: 6px;
+    }
+
+    .message {
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .error {
+      background: #fdecea;
+      color: #b71c1c;
+    }
+
+    .success {
+      background: #e8f5e9;
+      color: #1b5e20;
+    }
+
+    form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .full-width {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #cfd8dc;
+      border-radius: 8px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    .actions {
+      grid-column: 1 / -1;
+      display: flex;
+      gap: 12px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    button, a.button-link {
+      background: #1976d2;
+      color: white;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 8px;
+      text-decoration: none;
+      cursor: pointer;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    a.button-link.secondary {
+      background: #607d8b;
+    }
+
+    @media (max-width: 700px) {
+      form {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div>
+        <h1>Detalle del caso #<%= caso.id %></h1>
+        <div class="meta">
+          Creado por: <%= caso.created_by_name || '—' %> |
+          Creado: <%= caso.created_at || '—' %> |
+          Última actualización: <%= caso.updated_at || '—' %>
+        </div>
+      </div>
+      <div>
+        <a class="button-link secondary" href="/cases">Volver al listado</a>
+      </div>
+    </div>
+
+    <% if (error) { %>
+      <div class="message error"><%= error %></div>
+    <% } %>
+
+    <% if (success) { %>
+      <div class="message success"><%= success %></div>
+    <% } %>
+
+    <form action="/cases/<%= caso.id %>/edit" method="POST">
+      <div>
+        <label for="case_code">Código del caso</label>
+        <input type="text" id="case_code" name="case_code" value="<%= caso.case_code || '' %>" />
+      </div>
+
+      <div>
+        <label for="person_name">Nombre de la persona</label>
+        <input type="text" id="person_name" name="person_name" value="<%= caso.person_name || '' %>" />
+      </div>
+
+      <div>
+        <label for="alias">Alias o referencia</label>
+        <input type="text" id="alias" name="alias" value="<%= caso.alias || '' %>" />
+      </div>
+
+      <div>
+        <label for="status">Estatus</label>
+        <select id="status" name="status">
+          <option value="captura_inicial" <%= caso.status === 'captura_inicial' ? 'selected' : '' %>>Captura inicial</option>
+          <option value="reportada" <%= caso.status === 'reportada' ? 'selected' : '' %>>Reportada</option>
+          <option value="localizada_con_vida" <%= caso.status === 'localizada_con_vida' ? 'selected' : '' %>>Localizada con vida</option>
+          <option value="cerrada" <%= caso.status === 'cerrada' ? 'selected' : '' %>>Cerrada</option>
+          <option value="descartada" <%= caso.status === 'descartada' ? 'selected' : '' %>>Descartada</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="source_type">Tipo de fuente</label>
+        <select id="source_type" name="source_type">
+          <option value="familiar" <%= caso.source_type === 'familiar' ? 'selected' : '' %>>Familiar</option>
+          <option value="fuente_publica" <%= caso.source_type === 'fuente_publica' ? 'selected' : '' %>>Fuente pública</option>
+          <option value="oficial" <%= caso.source_type === 'oficial' ? 'selected' : '' %>>Oficial</option>
+          <option value="entrevista_directa" <%= caso.source_type === 'entrevista_directa' ? 'selected' : '' %>>Entrevista directa</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="country">País</label>
+        <input type="text" id="country" name="country" value="<%= caso.country || 'México' %>" />
+      </div>
+
+      <div>
+        <label for="report_date">Fecha de reporte</label>
+        <input type="date" id="report_date" name="report_date" value="<%= caso.report_date ? String(caso.report_date).slice(0,10) : '' %>" />
+      </div>
+
+      <div>
+        <label for="found_date">Fecha de localización</label>
+        <input type="date" id="found_date" name="found_date" value="<%= caso.found_date ? String(caso.found_date).slice(0,10) : '' %>" />
+      </div>
+
+      <div>
+        <label for="state">Estado</label>
+        <input type="text" id="state" name="state" value="<%= caso.state || '' %>" />
+      </div>
+
+      <div>
+        <label for="municipality">Municipio</label>
+        <input type="text" id="municipality" name="municipality" value="<%= caso.municipality || '' %>" />
+      </div>
+
+      <div class="full-width">
+        <label for="notes">Observaciones</label>
+        <textarea id="notes" name="notes"><%= caso.notes || '' %></textarea>
+      </div>
+
+      <div class="actions">
+        <button type="submit">Guardar cambios</button>
+        <a class="button-link secondary" href="/cases">Volver al listado</a>
+      </div>
+    </form>
+  </div>
+</body>
+</html>

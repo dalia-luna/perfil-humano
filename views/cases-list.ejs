@@ -109,7 +109,7 @@
               <th>Ubicación</th>
               <th>Creado por</th>
               <th>Fecha</th>
-              <th>Acción</th>
+              <th>Detalle</th>
             </tr>
           </thead>
           <tbody>
@@ -132,7 +132,7 @@
                 <td><%= caso.created_by_name || '—' %></td>
                 <td><%= caso.created_at || '—' %></td>
                 <td>
-                  <a class="action-link" href="/cases">Ver</a>
+                  <a class="action-link" href="/cases/<%= caso.id %>">Ver</a>
                 </td>
               </tr>
             <% }); %>
