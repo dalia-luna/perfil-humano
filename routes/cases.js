@@ -18,6 +18,31 @@ function requireAdmin(req, res, next) {
   next();
 }
 
+// LISTADO DE CASOS
+router.get('/', requireAuth, requireAdmin, (req, res) => {
+  const sql = `
+    SELECT 
+      c.*,
+      u.name AS created_by_name
+    FROM cases c
+    LEFT JOIN users u ON c.created_by_user_id = u.id
+    WHERE c.is_active = 1
+    ORDER BY c.created_at DESC
+  `;
+
+  db.all(sql, [], (err, cases) => {
+    if (err) {
+      console.error('Error al cargar casos:', err.message);
+      return res.status(500).send('Error al cargar los casos.');
+    }
+
+    res.render('cases-list', {
+      title: 'Listado de casos',
+      cases
+    });
+  });
+});
+
 // FORMULARIO: nuevo caso
 router.get('/new', requireAuth, requireAdmin, (req, res) => {
   res.render('new-case', {
@@ -94,11 +119,7 @@ router.post('/new', requireAuth, requireAdmin, (req, res) => {
       });
     }
 
-    return res.render('new-case', {
-      title: 'Nuevo Caso',
-      error: null,
-      success: `Caso creado correctamente con ID ${this.lastID}.`
-    });
+    return res.redirect('/cases');
   });
 });
 

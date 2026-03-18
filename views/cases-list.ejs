@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <style>
+    * { box-sizing: border-box; font-family: Arial, sans-serif; }
+    body { margin: 0; background: #eef3f8; color: #0f172a; padding: 24px; }
+
+    .topbar, .container { max-width: 1300px; margin: 0 auto; }
+    .topbar {
+      margin-bottom: 20px; display: flex; justify-content: space-between;
+      align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+    .topbar h1 { margin: 0; font-size: 2rem; }
+    .topbar-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    .btn, .btn-secondary {
+      display: inline-block; padding: 10px 16px; border-radius: 999px;
+      text-decoration: none; font-weight: bold;
+    }
+    .btn { background: #2563eb; color: white; }
+    .btn-secondary { background: #e2e8f0; color: #0f172a; }
+
+    .card, .table-wrap {
+      background: white; border-radius: 20px; padding: 22px;
+      box-shadow: 0 8px 24px rgba(15,23,42,.06); border: 1px solid #e5e7eb;
+    }
+    .table-wrap { overflow-x: auto; padding: 0; }
+
+    .toolbar {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 12px; flex-wrap: wrap; margin-bottom: 18px;
+    }
+
+    .search-box input {
+      width: 340px; max-width: 100%; padding: 12px 14px;
+      border: 1px solid #cbd5e1; border-radius: 12px; font-size: 1rem;
+      outline: none; background: #fff;
+    }
+
+    table { width: 100%; border-collapse: collapse; min-width: 1100px; }
+    thead { background: #f8fafc; }
+    th, td {
+      text-align: left; padding: 16px 14px; border-bottom: 1px solid #e5e7eb; vertical-align: middle;
+    }
+    th {
+      font-size: .9rem; color: #475569; text-transform: uppercase; letter-spacing: .03em;
+    }
+    tr:hover { background: #fafcff; }
+
+    .pill {
+      display: inline-block; padding: 6px 10px; border-radius: 999px;
+      font-size: .82rem; font-weight: bold;
+    }
+    .pill-status { background: #dbeafe; color: #1d4ed8; }
+    .pill-source { background: #dcfce7; color: #166534; }
+
+    .empty { padding: 28px; text-align: center; color: #64748b; }
+    .muted { color: #64748b; font-size: .92rem; }
+
+    .action-link {
+      display: inline-block;
+      background: #dbeafe;
+      color: #1d4ed8;
+      padding: 8px 12px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: .9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <h1>Listado de casos</h1>
+    <div class="topbar-actions">
+      <a class="btn" href="/cases/new">Registrar nuevo caso</a>
+      <a class="btn-secondary" href="/admin/dashboard">Volver al panel</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="card">
+      <div class="toolbar">
+        <div>
+          <strong>Total de casos:</strong> <%= cases.length %>
+        </div>
+        <div class="search-box">
+          <input type="text" id="caseSearch" placeholder="Buscar por código, nombre, alias, estado o municipio..." />
+        </div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <% if (!cases.length) { %>
+        <div class="empty">No hay casos registrados todavía.</div>
+      <% } else { %>
+        <table id="casesTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Código</th>
+              <th>Nombre</th>
+              <th>Alias</th>
+              <th>Estatus</th>
+              <th>Fuente</th>
+              <th>Ubicación</th>
+              <th>Creado por</th>
+              <th>Fecha</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% cases.forEach(function(caso) { %>
+              <tr>
+                <td><strong>#<%= caso.id %></strong></td>
+                <td><%= caso.case_code || '—' %></td>
+                <td><%= caso.person_name || '—' %></td>
+                <td><%= caso.alias || '—' %></td>
+                <td>
+                  <span class="pill pill-status"><%= caso.status %></span>
+                </td>
+                <td>
+                  <span class="pill pill-source"><%= caso.source_type %></span>
+                </td>
+                <td>
+                  <div><%= caso.state || '—' %></div>
+                  <div class="muted"><%= caso.municipality || '—' %></div>
+                </td>
+                <td><%= caso.created_by_name || '—' %></td>
+                <td><%= caso.created_at || '—' %></td>
+                <td>
+                  <a class="action-link" href="/cases">Ver</a>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      <% } %>
+    </div>
+  </div>
+
+  <script>
+    const searchInput = document.getElementById('caseSearch');
+    const table = document.getElementById('casesTable');
+
+    if (searchInput && table) {
+      const rows = Array.from(table.querySelectorAll('tbody tr'));
+
+      searchInput.addEventListener('input', function () {
+        const term = this.value.toLowerCase().trim();
+
+        rows.forEach((row) => {
+          const text = row.innerText.toLowerCase();
+          row.style.display = text.includes(term) ? '' : 'none';
+        });
+      });
+    }
+  </script>
+</body>
+</html>
