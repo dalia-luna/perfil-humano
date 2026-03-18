@@ -30,6 +30,45 @@ function formatDate(dateValue) {
   });
 }
 
+// Normalizar texto para comparación
+function normalizeText(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
+// Obtener mapa de codificación por pregunta
+function buildQuestionOptionMaps() {
+  const optionMaps = {};
+  const codingDictionary = [];
+
+  questions.forEach((q, index) => {
+    const questionNumber = index + 1;
+
+    if (Array.isArray(q.options) && q.options.length > 0) {
+      const optionMap = {};
+      q.options.forEach((option, optionIndex) => {
+        const code = optionIndex + 1;
+        optionMap[normalizeText(option)] = code;
+
+        codingDictionary.push({
+          Pregunta_Numero: questionNumber,
+          Columna_Excel: `P${questionNumber}`,
+          Texto_Pregunta: q.text || '',
+          Opcion_Texto: option,
+          Codigo_Numerico: code
+        });
+      });
+
+      optionMaps[questionNumber] = optionMap;
+    }
+  });
+
+  return { optionMaps, codingDictionary };
+}
+
 // Dashboard admin
 router.get('/dashboard', requireAdmin, (req, res) => {
   const progressFilter = req.query.progress || 'all';
@@ -209,7 +248,7 @@ router.get('/user/:id', requireAdmin, (req, res) => {
   });
 });
 
-// Exportar Excel mejorado: una fila por usuario
+// Exportar Excel mejorado: texto + diccionario + categórico
 router.get('/export/excel', requireAdmin, (req, res) => {
   const sql = `
     SELECT 
@@ -233,11 +272,26 @@ router.get('/export/excel', requireAdmin, (req, res) => {
     }
 
     const totalQuestions = questions.length;
-    const usersMap = {};
+    const { optionMaps, codingDictionary } = buildQuestionOptionMaps();
+
+    const usersMapText = {};
+    const usersMapCategorical = {};
 
     rows.forEach((row) => {
-      if (!usersMap[row.user_id]) {
-        const baseRow = {
+      if (!usersMapText[row.user_id]) {
+        const baseTextRow = {
+          Usuario_ID: row.user_id,
+          Nombre: row.name || '',
+          Correo: row.email || '',
+          Rol: row.role || '',
+          Fecha_Registro: row.created_at || '',
+          Respuestas_Contestadas: 0,
+          Porcentaje_Avance: 0,
+          Estado_Cuestionario: 'Sin iniciar',
+          Ultima_Actividad: ''
+        };
+
+        const baseCategoricalRow = {
           Usuario_ID: row.user_id,
           Nombre: row.name || '',
           Correo: row.email || '',
@@ -250,29 +304,65 @@ router.get('/export/excel', requireAdmin, (req, res) => {
         };
 
         for (let i = 1; i <= totalQuestions; i++) {
-          baseRow[`P${i}`] = '';
+          baseTextRow[`P${i}`] = '';
+          baseCategoricalRow[`P${i}`] = '';
         }
 
-        usersMap[row.user_id] = baseRow;
+        usersMapText[row.user_id] = baseTextRow;
+        usersMapCategorical[row.user_id] = baseCategoricalRow;
       }
 
       if (row.question_number) {
-        usersMap[row.user_id][`P${row.question_number}`] = row.answer_text || '';
-        usersMap[row.user_id].Respuestas_Contestadas += 1;
+        const questionCol = `P${row.question_number}`;
+        const answerText = row.answer_text || '';
+
+        usersMapText[row.user_id][questionCol] = answerText;
+        usersMapText[row.user_id].Respuestas_Contestadas += 1;
+
+        usersMapCategorical[row.user_id].Respuestas_Contestadas += 1;
+
+        const normalizedAnswer = normalizeText(answerText);
+        const optionMap = optionMaps[row.question_number];
+
+        if (optionMap && Object.prototype.hasOwnProperty.call(optionMap, normalizedAnswer)) {
+          usersMapCategorical[row.user_id][questionCol] = optionMap[normalizedAnswer];
+        } else {
+          usersMapCategorical[row.user_id][questionCol] = '';
+        }
 
         if (
           row.updated_at &&
           (
-            !usersMap[row.user_id].Ultima_Actividad ||
-            new Date(row.updated_at) > new Date(usersMap[row.user_id].Ultima_Actividad)
+            !usersMapText[row.user_id].Ultima_Actividad ||
+            new Date(row.updated_at) > new Date(usersMapText[row.user_id].Ultima_Actividad)
           )
         ) {
-          usersMap[row.user_id].Ultima_Actividad = row.updated_at;
+          usersMapText[row.user_id].Ultima_Actividad = row.updated_at;
+          usersMapCategorical[row.user_id].Ultima_Actividad = row.updated_at;
         }
       }
     });
 
-    const data = Object.values(usersMap).map((userRow) => {
+    const dataText = Object.values(usersMapText).map((userRow) => {
+      const answered = userRow.Respuestas_Contestadas || 0;
+      const completion = totalQuestions > 0
+        ? Math.round((answered / totalQuestions) * 100)
+        : 0;
+
+      userRow.Porcentaje_Avance = completion;
+
+      if (answered === 0) {
+        userRow.Estado_Cuestionario = 'Sin iniciar';
+      } else if (completion >= 100) {
+        userRow.Estado_Cuestionario = 'Completado';
+      } else {
+        userRow.Estado_Cuestionario = 'En progreso';
+      }
+
+      return userRow;
+    });
+
+    const dataCategorical = Object.values(usersMapCategorical).map((userRow) => {
       const answered = userRow.Respuestas_Contestadas || 0;
       const completion = totalQuestions > 0
         ? Math.round((answered / totalQuestions) * 100)
@@ -301,11 +391,17 @@ router.get('/export/excel', requireAdmin, (req, res) => {
 
     const workbook = XLSX.utils.book_new();
 
-    const worksheetData = XLSX.utils.json_to_sheet(data);
-    XLSX.utils.book_append_sheet(workbook, worksheetData, 'Respuestas');
+    const worksheetText = XLSX.utils.json_to_sheet(dataText);
+    XLSX.utils.book_append_sheet(workbook, worksheetText, 'Respuestas');
 
     const worksheetQuestions = XLSX.utils.json_to_sheet(questionsSheetData);
     XLSX.utils.book_append_sheet(workbook, worksheetQuestions, 'Diccionario');
+
+    const worksheetCategorical = XLSX.utils.json_to_sheet(dataCategorical);
+    XLSX.utils.book_append_sheet(workbook, worksheetCategorical, 'IA_Categorica');
+
+    const worksheetCoding = XLSX.utils.json_to_sheet(codingDictionary);
+    XLSX.utils.book_append_sheet(workbook, worksheetCoding, 'Codificacion');
 
     const buffer = XLSX.write(workbook, {
       type: 'buffer',
@@ -314,7 +410,7 @@ router.get('/export/excel', requireAdmin, (req, res) => {
 
     res.setHeader(
       'Content-Disposition',
-      'attachment; filename="perfiles_humano_digital_matriz.xlsx"'
+      'attachment; filename="perfiles_humano_digital_matriz_ia.xlsx"'
     );
     res.setHeader(
       'Content-Type',
