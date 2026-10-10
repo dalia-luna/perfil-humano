@@ -11,6 +11,9 @@ require('./db.js');
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const questionnaireRoutes = require('./routes/questionnaire');
+const privacyRoutes = require('./routes/privacy');
+const { requireConsent } = require('./middleware/requireConsent');
+const { initializePrivacyTables } = require('./services/privacyService');
 const caseRoutes = require('./routes/cases');
 
 const app = express();
@@ -70,7 +73,8 @@ app.use((req, res, next) => {
 // Montar rutas
 app.use('/', authRoutes);
 app.use('/admin', adminRoutes);
-app.use('/questionnaire', questionnaireRoutes);
+app.use('/privacy', privacyRoutes);
+app.use('/questionnaire', requireConsent, questionnaireRoutes);
 app.use('/cases', caseRoutes);
 
 // Ruta principal
@@ -110,6 +114,10 @@ app.use((err, req, res, next) => {
 
   res.status(500).send('Error interno del servidor. Intenta más tarde.');
 });
+
+initializePrivacyTables()
+  .then(() => console.log('Privacidad: tablas y aviso inicializados'))
+  .catch((err) => console.error('Error inicializando privacidad:', err));
 
 const port = process.env.PORT || 3000;
 

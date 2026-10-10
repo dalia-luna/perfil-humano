@@ -1,0 +1,166 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f4f7fb;
+  color: #1f2937;
+}
+
+.privacy-shell {
+  width: min(920px, calc(100% - 32px));
+  margin: 40px auto;
+}
+
+.privacy-card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 36px;
+  box-shadow: 0 12px 35px rgba(0,0,0,.08);
+}
+
+.privacy-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #e8f0ff;
+  color: #174ea6;
+  font-size: .85rem;
+  font-weight: 700;
+}
+
+h1 {
+  margin: 16px 0 10px;
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+}
+
+h2 {
+  margin-top: 26px;
+  font-size: 1.15rem;
+}
+
+.lead {
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+.notice-summary {
+  margin-top: 26px;
+  padding: 8px 24px 24px;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  background: #fbfcfe;
+}
+
+.notice-summary p,
+.privacy-document p,
+.privacy-document li {
+  line-height: 1.65;
+}
+
+.notice-link {
+  margin: 22px 0;
+}
+
+.notice-link a {
+  color: #174ea6;
+  font-weight: 700;
+}
+
+.consent-box {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 18px;
+  border: 2px solid #dbe3ef;
+  border-radius: 14px;
+  cursor: pointer;
+  line-height: 1.55;
+}
+
+.consent-box input {
+  margin-top: 5px;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+}
+
+.voluntary,
+.version,
+.legal-note {
+  color: #6b7280;
+  font-size: .92rem;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.btn {
+  display: inline-block;
+  padding: 12px 18px;
+  border: 0;
+  border-radius: 10px;
+  text-decoration: none;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: #174ea6;
+  color: #fff;
+}
+
+.btn-primary:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: #eef2f7;
+  color: #374151;
+}
+
+.alert {
+  margin: 20px 0;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: #fff2f2;
+  border: 1px solid #f5c2c7;
+}
+
+.version {
+  margin-top: 28px;
+  text-align: right;
+}
+
+.privacy-document ul {
+  padding-left: 22px;
+}
+
+.legal-note {
+  margin-top: 32px;
+  padding-top: 18px;
+  border-top: 1px solid #e5e7eb;
+}
+
+@media (max-width: 640px) {
+  .privacy-card {
+    padding: 22px;
+  }
+
+  .actions {
+    flex-direction: column-reverse;
+  }
+
+  .btn {
+    width: 100%;
+    text-align: center;
+  }
+}

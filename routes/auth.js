@@ -71,7 +71,7 @@ router.post('/register', (req, res) => {
           return res.redirect('/admin/dashboard');
         }
 
-        return res.redirect('/questionnaire/instructions');
+        return res.redirect('/privacy/consent');
       });
     });
   });
@@ -147,7 +147,7 @@ router.post('/login', (req, res) => {
         return res.redirect('/admin/dashboard');
       }
 
-      return res.redirect('/questionnaire/instructions');
+      return res.redirect('/privacy/consent');
     });
   });
 });

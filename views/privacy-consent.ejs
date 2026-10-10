@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consentimiento | Perfil Humano Digital</title>
+  <link rel="stylesheet" href="/css/privacy.css">
+</head>
+<body>
+  <main class="privacy-shell">
+    <section class="privacy-card">
+      <div class="privacy-badge">Perfil Humano Digital</div>
+
+      <h1>Aviso de Privacidad y Consentimiento</h1>
+
+      <p class="lead">
+        Antes de iniciar el cuestionario, lee cómo serán utilizados tus datos personales
+        y características físicas dentro del proyecto de investigación.
+      </p>
+
+      <% if (error) { %>
+        <div class="alert"><%= error %></div>
+      <% } %>
+
+      <div class="notice-summary">
+        <h2>¿Quién es responsable?</h2>
+        <p><strong><%= notice.responsibleName %></strong></p>
+
+        <h2>¿Qué información se tratará?</h2>
+        <p>
+          Datos de cuenta y las características físicas y morfológicas proporcionadas
+          mediante el cuestionario, así como el perfil digital y resultados computacionales
+          que se deriven de dichas respuestas.
+        </p>
+
+        <h2>¿Para qué se utilizarán?</h2>
+        <p>
+          Para investigación científica sobre caracterización computacional de rasgos físicos,
+          comparación de perfiles, medidas de similitud, agrupamiento, recuperación de perfiles
+          y generación de resultados académicos y científicos.
+        </p>
+
+        <h2>Datos personales sensibles</h2>
+        <p><%= notice.sensitiveDataStatement %></p>
+
+        <h2>Publicaciones académicas</h2>
+        <p>
+          Los resultados podrán incorporarse a tesis, artículos, congresos, informes y otros
+          productos académicos procurando utilizar información disociada que no identifique
+          directamente a las personas participantes.
+        </p>
+
+        <h2>Tus derechos</h2>
+        <p>
+          Puedes ejercer los derechos de acceso, rectificación, cancelación y oposición (ARCO),
+          así como solicitar la revocación del consentimiento conforme al Aviso de Privacidad Integral.
+        </p>
+      </div>
+
+      <p class="notice-link">
+        <a href="/privacy/notice" target="_blank" rel="noopener">
+          Consultar Aviso de Privacidad Integral
+        </a>
+      </p>
+
+      <form method="POST" action="/privacy/consent" id="consentForm">
+        <input type="hidden" name="csrfToken" value="<%= csrfToken %>">
+
+        <label class="consent-box">
+          <input
+            type="checkbox"
+            name="acceptConsent"
+            id="acceptConsent"
+            value="yes"
+            required
+          >
+          <span>
+            <strong>Otorgo mi consentimiento.</strong>
+            <%= notice.consentStatement %>
+          </span>
+        </label>
+
+        <p class="voluntary"><%= notice.voluntary %></p>
+
+        <div class="actions">
+          <a class="btn btn-secondary" href="/logout">No acepto</a>
+          <button class="btn btn-primary" type="submit" id="continueBtn" disabled>
+            Acepto y continuar
+          </button>
+        </div>
+      </form>
+
+      <p class="version">
+        Aviso versión <%= notice.version %> · Vigente desde <%= notice.effectiveDate %>
+      </p>
+    </section>
+  </main>
+
+  <script>
+    const checkbox = document.getElementById('acceptConsent');
+    const button = document.getElementById('continueBtn');
+
+    function updateButton() {
+      button.disabled = !checkbox.checked;
+    }
+
+    checkbox.addEventListener('change', updateButton);
+    updateButton();
+  </script>
+</body>
+</html>

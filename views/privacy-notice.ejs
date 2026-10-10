@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aviso de Privacidad Integral | Perfil Humano Digital</title>
+  <link rel="stylesheet" href="/css/privacy.css">
+</head>
+<body>
+  <main class="privacy-shell">
+    <article class="privacy-card privacy-document">
+      <div class="privacy-badge">Perfil Humano Digital</div>
+      <h1>Aviso de Privacidad Integral</h1>
+
+      <p>
+        <strong>Versión:</strong> <%= notice.version %><br>
+        <strong>Vigencia:</strong> <%= notice.effectiveDate %>
+      </p>
+
+      <h2>1. Responsable del tratamiento</h2>
+      <p>
+        <strong><%= notice.responsibleName %></strong><br>
+        Domicilio: <%= notice.responsibleAddress %><br>
+        Medio de contacto y derechos ARCO: <%= notice.arcoEmail %>
+      </p>
+
+      <h2>2. Datos personales sometidos a tratamiento</h2>
+      <ul>
+        <% notice.dataCategories.forEach(item => { %>
+          <li><%= item %></li>
+        <% }) %>
+      </ul>
+
+      <h2>3. Datos personales sensibles</h2>
+      <p><%= notice.sensitiveDataStatement %></p>
+
+      <h2>4. Finalidades del tratamiento</h2>
+      <ul>
+        <% notice.primaryPurposes.forEach(item => { %>
+          <li><%= item %></li>
+        <% }) %>
+      </ul>
+
+      <h2>5. Conservación</h2>
+      <p><%= notice.retention %></p>
+
+      <h2>6. Seguridad</h2>
+      <p><%= notice.security %></p>
+
+      <h2>7. Transferencias</h2>
+      <p><%= notice.transfers %></p>
+
+      <h2>8. Derechos ARCO y revocación del consentimiento</h2>
+      <p><%= notice.arco %></p>
+
+      <h2>9. Limitación del uso o divulgación</h2>
+      <p><%= notice.limitation %></p>
+
+      <h2>10. Cambios al Aviso de Privacidad</h2>
+      <p><%= notice.changes %></p>
+
+      <h2>11. Participación voluntaria</h2>
+      <p><%= notice.voluntary %></p>
+
+      <h2>12. Consentimiento</h2>
+      <p><%= notice.consentStatement %></p>
+
+      <p class="legal-note">
+        Este texto debe completarse con la identidad, domicilio y correo ARCO definitivos
+        del responsable antes de publicar la función en producción.
+      </p>
+    </article>
+  </main>
+</body>
+</html>
