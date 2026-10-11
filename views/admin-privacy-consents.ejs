@@ -13,8 +13,7 @@
         <div class="eyebrow">Perfil Humano Digital · Administración</div>
         <h1>Consentimientos de privacidad</h1>
         <p>
-          Seguimiento del consentimiento de los participantes para el aviso de privacidad
-          vigente.
+          Seguimiento del consentimiento de los participantes para el aviso de privacidad vigente.
         </p>
       </div>
 
@@ -38,6 +37,10 @@
         <span class="label">Fecha de vigencia</span>
         <strong><%= activeNotice ? activeNotice.effective_date : '—' %></strong>
       </div>
+      <div>
+        <span class="label">Zona horaria mostrada</span>
+        <strong>Ciudad de México</strong>
+      </div>
     </section>
 
     <section class="summary-grid">
@@ -49,6 +52,12 @@
       <article class="metric-card">
         <span>Consentimiento vigente</span>
         <strong><%= summary.current %></strong>
+      </article>
+
+      <article class="metric-card highlight">
+        <span>Porcentaje con consentimiento</span>
+        <strong><%= summary.percentage %>%</strong>
+        <small><%= summary.current %> de <%= summary.total %> participantes</small>
       </article>
 
       <article class="metric-card">
@@ -102,8 +111,8 @@
               <th>Participante</th>
               <th>Estado</th>
               <th>Versión</th>
-              <th>Aceptado</th>
-              <th>Revocado</th>
+              <th>Aceptado (CDMX)</th>
+              <th>Revocado (CDMX)</th>
             </tr>
           </thead>
           <tbody>
@@ -134,8 +143,8 @@
                   <% } %>
                 </td>
                 <td><%= user.accepted_version || '—' %></td>
-                <td><%= user.accepted_at || '—' %></td>
-                <td><%= user.revoked_at || '—' %></td>
+                <td><%= user.accepted_at_local %></td>
+                <td><%= user.revoked_at_local %></td>
               </tr>
             <% }) %>
           </tbody>
@@ -143,9 +152,9 @@
       </div>
 
       <p class="footnote">
-        “Vigente” significa que el usuario aceptó la versión del aviso actualmente activa.
-        “Versión anterior” indica que existe una aceptación previa, pero se requiere aceptar
-        nuevamente la versión vigente.
+        Las fechas almacenadas en SQLite permanecen en UTC. Esta pantalla las convierte
+        únicamente para visualización a la zona horaria de Ciudad de México.
+        El archivo CSV conserva tanto UTC como la fecha convertida.
       </p>
     </section>
   </main>

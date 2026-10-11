@@ -49,6 +49,44 @@ async function requireAdmin(req, res, next) {
   }
 }
 
+/**
+ * SQLite CURRENT_TIMESTAMP se guarda en UTC como:
+ * YYYY-MM-DD HH:mm:ss
+ *
+ * Aquí lo convertimos únicamente para visualización a America/Mexico_City.
+ * El valor original en la base NO se modifica.
+ */
+function formatUtcToMexicoCity(value) {
+  if (!value) return '—';
+
+  const raw = String(value).trim();
+  if (!raw) return '—';
+
+  let iso = raw;
+
+  // Si viene del formato estándar de SQLite sin zona, se interpreta explícitamente como UTC.
+  if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(raw)) {
+    iso = raw.replace(' ', 'T') + 'Z';
+  }
+
+  const date = new Date(iso);
+
+  if (Number.isNaN(date.getTime())) {
+    return raw;
+  }
+
+  return new Intl.DateTimeFormat('es-MX', {
+    timeZone: 'America/Mexico_City',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  }).format(date);
+}
+
 async function getConsentRows() {
   const activeNotice = await dbGet(`
     SELECT id, version, effective_date
@@ -101,7 +139,13 @@ async function getConsentRows() {
       u.name COLLATE NOCASE ASC
   `);
 
-  return { rows, activeNotice };
+  const displayRows = rows.map(row => ({
+    ...row,
+    accepted_at_local: formatUtcToMexicoCity(row.accepted_at),
+    revoked_at_local: formatUtcToMexicoCity(row.revoked_at)
+  }));
+
+  return { rows: displayRows, activeNotice };
 }
 
 function applyFilters(rows, query) {
@@ -124,7 +168,7 @@ function applyFilters(rows, query) {
 }
 
 function calculateSummary(rows) {
-  return rows.reduce(
+  const summary = rows.reduce(
     (acc, row) => {
       acc.total += 1;
       if (row.consent_status === 'current') acc.current += 1;
@@ -135,6 +179,13 @@ function calculateSummary(rows) {
     },
     { total: 0, current: 0, pending: 0, outdated: 0, revoked: 0 }
   );
+
+  summary.percentage =
+    summary.total > 0
+      ? ((summary.current / summary.total) * 100).toFixed(2)
+      : '0.00';
+
+  return summary;
 }
 
 function csvEscape(value) {
@@ -181,8 +232,10 @@ router.get('/consents.csv', requireAdmin, async (req, res) => {
       'Correo',
       'Estado consentimiento',
       'Versión aceptada',
-      'Fecha aceptación',
-      'Fecha revocación',
+      'Fecha aceptación UTC',
+      'Fecha aceptación CDMX',
+      'Fecha revocación UTC',
+      'Fecha revocación CDMX',
       'Versión vigente'
     ];
 
@@ -195,7 +248,9 @@ router.get('/consents.csv', requireAdmin, async (req, res) => {
         statusLabels[row.consent_status] || row.consent_status,
         row.accepted_version || '',
         row.accepted_at || '',
+        row.accepted_at_local === '—' ? '' : row.accepted_at_local,
         row.revoked_at || '',
+        row.revoked_at_local === '—' ? '' : row.revoked_at_local,
         activeNotice?.version || ''
       ].map(csvEscape).join(','))
     ];
@@ -206,7 +261,7 @@ router.get('/consents.csv', requireAdmin, async (req, res) => {
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader(
       'Content-Disposition',
-      'attachment; filename="consentimientos_pHD.csv"'
+      'attachment; filename="consentimientos_PHD.csv"'
     );
     res.send(csv);
   } catch (err) {

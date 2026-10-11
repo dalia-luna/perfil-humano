@@ -4,3 +4,31 @@ database.sqlite-shm
 database.sqlite-wal
 .env
 .DS_Store
+
+# ===== Privacidad / archivos locales PHD =====
+.DS_Store
+**/.DS_Store
+
+# Bases de datos locales y sesiones
+database.sqlite
+sessions.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite-journal
+database_backup*.sqlite
+
+# Respaldos generados por los instaladores
+*.bak-privacy
+*.bak-admin-privacy
+*.bak-v2
+
+# Instaladores y notas locales de integración
+apply-privacy-patch.js
+apply-admin-privacy-patch.js
+apply-mejoras-privacidad-v2.js
+INTEGRACION.md
+PASOS_DESPUES.txt
+PASOS_ADMIN_CONSENTIMIENTOS.txt
+
+# Carpeta temporal del paquete de actualización
+update-files/
