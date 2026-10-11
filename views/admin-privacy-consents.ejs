@@ -13,7 +13,8 @@
         <div class="eyebrow">Perfil Humano Digital · Administración</div>
         <h1>Consentimientos de privacidad</h1>
         <p>
-          Seguimiento del consentimiento de los participantes para el aviso de privacidad vigente.
+          Los participantes sintéticos se muestran por separado para no alterar
+          las métricas de consentimiento de participantes reales.
         </p>
       </div>
 
@@ -21,7 +22,7 @@
         <a class="btn secondary" href="/admin/dashboard">Volver al panel</a>
         <a
           class="btn primary"
-          href="/admin/privacy/consents.csv?search=<%= encodeURIComponent(filters.search) %>&status=<%= encodeURIComponent(filters.status) %>"
+          href="/admin/privacy/consents.csv?search=<%= encodeURIComponent(filters.search) %>&status=<%= encodeURIComponent(filters.status) %>&type=<%= encodeURIComponent(filters.type) %>"
         >
           Exportar CSV
         </a>
@@ -45,34 +46,40 @@
 
     <section class="summary-grid">
       <article class="metric-card">
-        <span>Total participantes</span>
-        <strong><%= summary.total %></strong>
+        <span>Participantes reales</span>
+        <strong><%= summary.realTotal %></strong>
       </article>
 
       <article class="metric-card">
-        <span>Consentimiento vigente</span>
-        <strong><%= summary.current %></strong>
+        <span>Consentimientos reales vigentes</span>
+        <strong><%= summary.realCurrent %></strong>
       </article>
 
       <article class="metric-card highlight">
-        <span>Porcentaje con consentimiento</span>
-        <strong><%= summary.percentage %>%</strong>
-        <small><%= summary.current %> de <%= summary.total %> participantes</small>
+        <span>Porcentaje real de consentimiento</span>
+        <strong><%= summary.realPercentage %>%</strong>
+        <small><%= summary.realCurrent %> de <%= summary.realTotal %> participantes reales</small>
       </article>
 
       <article class="metric-card">
-        <span>Sin consentimiento</span>
-        <strong><%= summary.pending %></strong>
+        <span>Pendientes reales</span>
+        <strong><%= summary.realPending %></strong>
+        <small>
+          Anteriores: <%= summary.realOutdated %> · Revocados: <%= summary.realRevoked %>
+        </small>
       </article>
 
       <article class="metric-card">
-        <span>Versión anterior</span>
-        <strong><%= summary.outdated %></strong>
+        <span>Perfiles sintéticos / prueba</span>
+        <strong><%= summary.syntheticTotal %></strong>
       </article>
 
       <article class="metric-card">
-        <span>Revocados</span>
-        <strong><%= summary.revoked %></strong>
+        <span>Consentimientos simulados vigentes</span>
+        <strong><%= summary.syntheticCurrent %></strong>
+        <small>
+          Pendientes: <%= summary.syntheticPending %>
+        </small>
       </article>
     </section>
 
@@ -86,6 +93,15 @@
             value="<%= filters.search %>"
             placeholder="Nombre, correo o ID"
           >
+        </label>
+
+        <label>
+          <span>Tipo</span>
+          <select name="type">
+            <option value="all" <%= filters.type === 'all' ? 'selected' : '' %>>Todos</option>
+            <option value="real" <%= filters.type === 'real' ? 'selected' : '' %>>Participantes reales</option>
+            <option value="synthetic" <%= filters.type === 'synthetic' ? 'selected' : '' %>>Sintéticos / prueba</option>
+          </select>
         </label>
 
         <label>
@@ -109,6 +125,7 @@
             <tr>
               <th>ID</th>
               <th>Participante</th>
+              <th>Tipo</th>
               <th>Estado</th>
               <th>Versión</th>
               <th>Aceptado (CDMX)</th>
@@ -118,7 +135,7 @@
           <tbody>
             <% if (!users.length) { %>
               <tr>
-                <td colspan="6" class="empty">No se encontraron registros.</td>
+                <td colspan="7" class="empty">No se encontraron registros.</td>
               </tr>
             <% } %>
 
@@ -130,6 +147,13 @@
                     <strong><%= user.name %></strong>
                     <span><%= user.email %></span>
                   </div>
+                </td>
+                <td>
+                  <% if (user.is_synthetic) { %>
+                    <span class="badge outdated">Sintético</span>
+                  <% } else { %>
+                    <span class="badge current">Real</span>
+                  <% } %>
                 </td>
                 <td>
                   <% if (user.consent_status === 'current') { %>
@@ -152,9 +176,9 @@
       </div>
 
       <p class="footnote">
-        Las fechas almacenadas en SQLite permanecen en UTC. Esta pantalla las convierte
-        únicamente para visualización a la zona horaria de Ciudad de México.
-        El archivo CSV conserva tanto UTC como la fecha convertida.
+        Los perfiles con correo @phd-sim.mx o con marca interna SIMULATED se clasifican
+        como sintéticos. No se incluyen en el porcentaje de consentimiento real.
+        Las fechas permanecen almacenadas en UTC y se muestran convertidas a Ciudad de México.
       </p>
     </section>
   </main>

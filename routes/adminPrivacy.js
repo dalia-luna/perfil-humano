@@ -29,9 +29,7 @@ async function requireAdmin(req, res, next) {
   try {
     const userId = getSessionUserId(req);
 
-    if (!userId) {
-      return res.redirect('/login');
-    }
+    if (!userId) return res.redirect('/login');
 
     const user = await dbGet(
       'SELECT id, role FROM users WHERE id = ? LIMIT 1',
@@ -49,13 +47,6 @@ async function requireAdmin(req, res, next) {
   }
 }
 
-/**
- * SQLite CURRENT_TIMESTAMP se guarda en UTC como:
- * YYYY-MM-DD HH:mm:ss
- *
- * Aquí lo convertimos únicamente para visualización a America/Mexico_City.
- * El valor original en la base NO se modifica.
- */
 function formatUtcToMexicoCity(value) {
   if (!value) return '—';
 
@@ -63,17 +54,12 @@ function formatUtcToMexicoCity(value) {
   if (!raw) return '—';
 
   let iso = raw;
-
-  // Si viene del formato estándar de SQLite sin zona, se interpreta explícitamente como UTC.
   if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(raw)) {
     iso = raw.replace(' ', 'T') + 'Z';
   }
 
   const date = new Date(iso);
-
-  if (Number.isNaN(date.getTime())) {
-    return raw;
-  }
+  if (Number.isNaN(date.getTime())) return raw;
 
   return new Intl.DateTimeFormat('es-MX', {
     timeZone: 'America/Mexico_City',
@@ -115,8 +101,14 @@ async function getConsentRows() {
       lc.accepted,
       lc.accepted_at,
       lc.revoked_at,
+      lc.consent_text_hash,
       pnv.version AS accepted_version,
       pnv.effective_date AS accepted_version_date,
+      CASE
+        WHEN LOWER(COALESCE(u.email,'')) LIKE '%@phd-sim.mx'
+          OR COALESCE(lc.consent_text_hash,'') LIKE 'SIMULATED:%'
+        THEN 1 ELSE 0
+      END AS is_synthetic,
       CASE
         WHEN lc.id IS NULL THEN 'pending'
         WHEN lc.revoked_at IS NOT NULL OR lc.accepted <> 1 THEN 'revoked'
@@ -130,6 +122,7 @@ async function getConsentRows() {
       ON pnv.id = lc.notice_version_id
     WHERE LOWER(COALESCE(u.role, 'user')) <> 'admin'
     ORDER BY
+      is_synthetic ASC,
       CASE
         WHEN lc.id IS NULL THEN 1
         WHEN lc.revoked_at IS NOT NULL OR lc.accepted <> 1 THEN 2
@@ -139,18 +132,21 @@ async function getConsentRows() {
       u.name COLLATE NOCASE ASC
   `);
 
-  const displayRows = rows.map(row => ({
-    ...row,
-    accepted_at_local: formatUtcToMexicoCity(row.accepted_at),
-    revoked_at_local: formatUtcToMexicoCity(row.revoked_at)
-  }));
-
-  return { rows: displayRows, activeNotice };
+  return {
+    rows: rows.map(row => ({
+      ...row,
+      is_synthetic: Number(row.is_synthetic) === 1,
+      accepted_at_local: formatUtcToMexicoCity(row.accepted_at),
+      revoked_at_local: formatUtcToMexicoCity(row.revoked_at)
+    })),
+    activeNotice
+  };
 }
 
 function applyFilters(rows, query) {
   const search = String(query.search || '').trim().toLowerCase();
   const status = String(query.status || 'all').trim().toLowerCase();
+  const type = String(query.type || 'all').trim().toLowerCase();
 
   return rows.filter(row => {
     const matchesSearch =
@@ -160,29 +156,48 @@ function applyFilters(rows, query) {
       String(row.user_id).includes(search);
 
     const matchesStatus =
-      status === 'all' ||
-      row.consent_status === status;
+      status === 'all' || row.consent_status === status;
 
-    return matchesSearch && matchesStatus;
+    const matchesType =
+      type === 'all' ||
+      (type === 'real' && !row.is_synthetic) ||
+      (type === 'synthetic' && row.is_synthetic);
+
+    return matchesSearch && matchesStatus && matchesType;
   });
 }
 
 function calculateSummary(rows) {
-  const summary = rows.reduce(
-    (acc, row) => {
-      acc.total += 1;
-      if (row.consent_status === 'current') acc.current += 1;
-      if (row.consent_status === 'pending') acc.pending += 1;
-      if (row.consent_status === 'outdated') acc.outdated += 1;
-      if (row.consent_status === 'revoked') acc.revoked += 1;
-      return acc;
-    },
-    { total: 0, current: 0, pending: 0, outdated: 0, revoked: 0 }
-  );
+  const summary = {
+    total: rows.length,
+    realTotal: 0,
+    realCurrent: 0,
+    realPending: 0,
+    realOutdated: 0,
+    realRevoked: 0,
+    syntheticTotal: 0,
+    syntheticCurrent: 0,
+    syntheticPending: 0,
+    syntheticOutdated: 0,
+    syntheticRevoked: 0,
+    realPercentage: '0.00'
+  };
 
-  summary.percentage =
-    summary.total > 0
-      ? ((summary.current / summary.total) * 100).toFixed(2)
+  for (const row of rows) {
+    const prefix = row.is_synthetic ? 'synthetic' : 'real';
+
+    if (row.is_synthetic) summary.syntheticTotal++;
+    else summary.realTotal++;
+
+    if (row.consent_status === 'current') summary[`${prefix}Current`]++;
+    if (row.consent_status === 'pending') summary[`${prefix}Pending`]++;
+    if (row.consent_status === 'outdated') summary[`${prefix}Outdated`]++;
+    if (row.consent_status === 'revoked') summary[`${prefix}Revoked`]++;
+  }
+
+  summary.realPercentage =
+    summary.realTotal > 0
+      ? ((summary.realCurrent / summary.realTotal) * 100).toFixed(2)
       : '0.00';
 
   return summary;
@@ -205,7 +220,8 @@ router.get('/consents', requireAdmin, async (req, res) => {
       activeNotice,
       filters: {
         search: String(req.query.search || ''),
-        status: String(req.query.status || 'all')
+        status: String(req.query.status || 'all'),
+        type: String(req.query.type || 'all')
       }
     });
   } catch (err) {
@@ -230,6 +246,7 @@ router.get('/consents.csv', requireAdmin, async (req, res) => {
       'ID usuario',
       'Nombre',
       'Correo',
+      'Tipo participante',
       'Estado consentimiento',
       'Versión aceptada',
       'Fecha aceptación UTC',
@@ -245,6 +262,7 @@ router.get('/consents.csv', requireAdmin, async (req, res) => {
         row.user_id,
         row.name,
         row.email,
+        row.is_synthetic ? 'Sintético / prueba' : 'Real',
         statusLabels[row.consent_status] || row.consent_status,
         row.accepted_version || '',
         row.accepted_at || '',
@@ -255,7 +273,6 @@ router.get('/consents.csv', requireAdmin, async (req, res) => {
       ].map(csvEscape).join(','))
     ];
 
-    // BOM para que Excel abra correctamente acentos en UTF-8.
     const csv = '\uFEFF' + csvRows.join('\n');
 
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
