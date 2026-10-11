@@ -1,0 +1,273 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #f3f6fa;
+  color: #172033;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.admin-shell {
+  width: min(1500px, calc(100% - 40px));
+  margin: 34px auto 60px;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.eyebrow {
+  font-size: .83rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #2563eb;
+}
+
+h1 {
+  margin: 8px 0 8px;
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+
+.page-header p {
+  margin: 0;
+  color: #667085;
+}
+
+.header-actions,
+.filters {
+  display: flex;
+  gap: 10px;
+  align-items: end;
+  flex-wrap: wrap;
+}
+
+.btn {
+  border: 0;
+  border-radius: 10px;
+  padding: 11px 16px;
+  font-weight: 750;
+  font-size: .93rem;
+  text-decoration: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn.primary {
+  background: #2563eb;
+  color: #fff;
+}
+
+.btn.secondary {
+  background: #e8edf5;
+  color: #344054;
+}
+
+.notice-info,
+.summary-grid,
+.panel {
+  background: #fff;
+  border: 1px solid #e6eaf0;
+  border-radius: 16px;
+  box-shadow: 0 8px 25px rgba(16, 24, 40, .05);
+}
+
+.notice-info {
+  display: flex;
+  gap: 56px;
+  padding: 18px 22px;
+  margin-bottom: 18px;
+}
+
+.notice-info div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.label {
+  color: #667085;
+  font-size: .82rem;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+
+.metric-card {
+  padding: 20px;
+  border-right: 1px solid #edf0f4;
+}
+
+.metric-card:last-child {
+  border-right: 0;
+}
+
+.metric-card span {
+  color: #667085;
+  font-size: .86rem;
+}
+
+.metric-card strong {
+  display: block;
+  margin-top: 7px;
+  font-size: 1.9rem;
+}
+
+.panel {
+  padding: 20px;
+}
+
+.filters {
+  margin-bottom: 18px;
+}
+
+.filters label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 240px;
+}
+
+.filters label span {
+  color: #475467;
+  font-size: .82rem;
+  font-weight: 700;
+}
+
+input,
+select {
+  min-height: 42px;
+  border: 1px solid #d0d5dd;
+  border-radius: 9px;
+  padding: 8px 11px;
+  background: #fff;
+  font: inherit;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid #eaecf0;
+  border-radius: 12px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 920px;
+}
+
+th {
+  text-align: left;
+  padding: 13px 14px;
+  background: #f8fafc;
+  color: #475467;
+  font-size: .78rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+td {
+  padding: 14px;
+  border-top: 1px solid #eaecf0;
+  vertical-align: middle;
+}
+
+.person {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.person span {
+  color: #667085;
+  font-size: .86rem;
+}
+
+.badge {
+  display: inline-block;
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: .78rem;
+  font-weight: 800;
+}
+
+.badge.current {
+  background: #ecfdf3;
+  color: #027a48;
+}
+
+.badge.pending {
+  background: #fff7ed;
+  color: #b54708;
+}
+
+.badge.outdated {
+  background: #eff8ff;
+  color: #175cd3;
+}
+
+.badge.revoked {
+  background: #fef3f2;
+  color: #b42318;
+}
+
+.empty {
+  text-align: center;
+  color: #667085;
+  padding: 40px;
+}
+
+.footnote {
+  margin: 16px 2px 0;
+  color: #667085;
+  font-size: .83rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 950px) {
+  .summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .metric-card {
+    border-bottom: 1px solid #edf0f4;
+  }
+
+  .page-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 600px) {
+  .admin-shell {
+    width: min(100% - 22px, 1500px);
+    margin-top: 18px;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .notice-info {
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .filters label,
+  .btn {
+    width: 100%;
+  }
+}

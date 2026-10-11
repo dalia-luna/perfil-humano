@@ -10,6 +10,7 @@ require('./db.js');
 // Rutas
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
+const adminPrivacyRoutes = require('./routes/adminPrivacy');
 const questionnaireRoutes = require('./routes/questionnaire');
 const privacyRoutes = require('./routes/privacy');
 const { requireConsent } = require('./middleware/requireConsent');
@@ -72,6 +73,7 @@ app.use((req, res, next) => {
 
 // Montar rutas
 app.use('/', authRoutes);
+app.use('/admin/privacy', adminPrivacyRoutes);
 app.use('/admin', adminRoutes);
 app.use('/privacy', privacyRoutes);
 app.use('/questionnaire', requireConsent, questionnaireRoutes);

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consentimientos | Administración PHD</title>
+  <link rel="stylesheet" href="/css/admin-privacy.css">
+</head>
+<body>
+  <main class="admin-shell">
+    <header class="page-header">
+      <div>
+        <div class="eyebrow">Perfil Humano Digital · Administración</div>
+        <h1>Consentimientos de privacidad</h1>
+        <p>
+          Seguimiento del consentimiento de los participantes para el aviso de privacidad
+          vigente.
+        </p>
+      </div>
+
+      <div class="header-actions">
+        <a class="btn secondary" href="/admin/dashboard">Volver al panel</a>
+        <a
+          class="btn primary"
+          href="/admin/privacy/consents.csv?search=<%= encodeURIComponent(filters.search) %>&status=<%= encodeURIComponent(filters.status) %>"
+        >
+          Exportar CSV
+        </a>
+      </div>
+    </header>
+
+    <section class="notice-info">
+      <div>
+        <span class="label">Versión vigente</span>
+        <strong><%= activeNotice ? activeNotice.version : 'Sin versión activa' %></strong>
+      </div>
+      <div>
+        <span class="label">Fecha de vigencia</span>
+        <strong><%= activeNotice ? activeNotice.effective_date : '—' %></strong>
+      </div>
+    </section>
+
+    <section class="summary-grid">
+      <article class="metric-card">
+        <span>Total participantes</span>
+        <strong><%= summary.total %></strong>
+      </article>
+
+      <article class="metric-card">
+        <span>Consentimiento vigente</span>
+        <strong><%= summary.current %></strong>
+      </article>
+
+      <article class="metric-card">
+        <span>Sin consentimiento</span>
+        <strong><%= summary.pending %></strong>
+      </article>
+
+      <article class="metric-card">
+        <span>Versión anterior</span>
+        <strong><%= summary.outdated %></strong>
+      </article>
+
+      <article class="metric-card">
+        <span>Revocados</span>
+        <strong><%= summary.revoked %></strong>
+      </article>
+    </section>
+
+    <section class="panel">
+      <form class="filters" method="GET" action="/admin/privacy/consents">
+        <label>
+          <span>Buscar usuario</span>
+          <input
+            type="search"
+            name="search"
+            value="<%= filters.search %>"
+            placeholder="Nombre, correo o ID"
+          >
+        </label>
+
+        <label>
+          <span>Estado</span>
+          <select name="status">
+            <option value="all" <%= filters.status === 'all' ? 'selected' : '' %>>Todos</option>
+            <option value="current" <%= filters.status === 'current' ? 'selected' : '' %>>Vigente</option>
+            <option value="pending" <%= filters.status === 'pending' ? 'selected' : '' %>>Pendiente</option>
+            <option value="outdated" <%= filters.status === 'outdated' ? 'selected' : '' %>>Versión anterior</option>
+            <option value="revoked" <%= filters.status === 'revoked' ? 'selected' : '' %>>Revocado</option>
+          </select>
+        </label>
+
+        <button class="btn primary" type="submit">Filtrar</button>
+        <a class="btn secondary" href="/admin/privacy/consents">Limpiar</a>
+      </form>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Participante</th>
+              <th>Estado</th>
+              <th>Versión</th>
+              <th>Aceptado</th>
+              <th>Revocado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (!users.length) { %>
+              <tr>
+                <td colspan="6" class="empty">No se encontraron registros.</td>
+              </tr>
+            <% } %>
+
+            <% users.forEach(user => { %>
+              <tr>
+                <td><%= user.user_id %></td>
+                <td>
+                  <div class="person">
+                    <strong><%= user.name %></strong>
+                    <span><%= user.email %></span>
+                  </div>
+                </td>
+                <td>
+                  <% if (user.consent_status === 'current') { %>
+                    <span class="badge current">Vigente</span>
+                  <% } else if (user.consent_status === 'pending') { %>
+                    <span class="badge pending">Pendiente</span>
+                  <% } else if (user.consent_status === 'outdated') { %>
+                    <span class="badge outdated">Versión anterior</span>
+                  <% } else { %>
+                    <span class="badge revoked">Revocado</span>
+                  <% } %>
+                </td>
+                <td><%= user.accepted_version || '—' %></td>
+                <td><%= user.accepted_at || '—' %></td>
+                <td><%= user.revoked_at || '—' %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="footnote">
+        “Vigente” significa que el usuario aceptó la versión del aviso actualmente activa.
+        “Versión anterior” indica que existe una aceptación previa, pero se requiere aceptar
+        nuevamente la versión vigente.
+      </p>
+    </section>
+  </main>
+</body>
+</html>
